@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 
 namespace SteeringAssignment_real.Models
@@ -16,6 +15,9 @@ namespace SteeringAssignment_real.Models
         private bool _active = true;
         public int frameWidth;
         public int frameHeight;
+
+        public int CurrentFrameIndex => _frame;
+        public int FrameCount => _frames;
 
         public Animation(Texture2D texture, int framesX, int framesY, float frameTime, int row = 1)
         {
@@ -52,7 +54,7 @@ namespace SteeringAssignment_real.Models
         {
             if (!_active) return;
 
-            _frameTimeLeft -= Globals.Time;
+            _frameTimeLeft -= (float)Globals.Time;
 
             if (_frameTimeLeft <= 0)
             {

@@ -54,7 +54,7 @@ namespace SteeringAssignment_real.Mangers
             InputManager.Update();
             _player.Update();
             _torchLight.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
-            _skeleton.Update(_player.Position);
+            _skeleton.Update(_player);
             CalculateTranslation();
         }
 

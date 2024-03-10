@@ -62,7 +62,64 @@ namespace SteeringAssignment_real.Mangers
                     }
                 }
             }
-        }
+
+            // Check collisions between entities
+            foreach (var entityA in gameManager._entities)
+            {
+                foreach (var entityB in gameManager._entities)
+                {
+                    if (entityA != entityB)
+                    {
+                        // Calculate distances and minimum distances
+                        float distanceX = Math.Abs(entityA.Position.X - entityB.Position.X);
+                        float distanceY = Math.Abs(entityA.Position.Y - entityB.Position.Y);
+                        float minDistanceX = entityA.width / 4 + entityB.width / 4;
+                        float minDistanceY = entityA.height / 4 + entityB.height / 4;
+
+                        // If a collision occurs, adjust positions
+                        if (distanceX < minDistanceX && distanceY < minDistanceY)
+                        {
+                            float overlapX = minDistanceX - distanceX;
+                            float overlapY = minDistanceY - distanceY;
+
+                            if (overlapX < overlapY)
+                            {
+                                // Adjust the positions of the colliding entities along the X-axis
+                                if (entityA.Position.X < entityB.Position.X)
+                                {
+                                    entityA.Position.X -= overlapX / 2;
+                                    entityB.Position.X += overlapX / 2;
+                                }
+                                else
+                                {
+                                    entityA.Position.X += overlapX / 2;
+                                    entityB.Position.X -= overlapX / 2;
+                                }
+                            }
+                            else
+                            {
+                                // Adjust the positions of the colliding entities along the Y-axis
+                                if (entityA.Position.Y < entityB.Position.Y)
+                                {
+                                    entityA.Position.Y -= overlapY / 2;
+                                    entityB.Position.Y += overlapY / 2;
+                                }
+                                else
+                                {
+                                    entityA.Position.Y += overlapY / 2;
+                                    entityB.Position.Y -= overlapY / 2;
+                                }
+                            }// end else
+
+                        } // end inner if
+
+                    }// end if
+
+                }// end for
+
+            }// end for
+
+        }// end function
 
     }
 }
