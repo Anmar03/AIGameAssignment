@@ -78,7 +78,7 @@ namespace SteeringAssignment_real.Mangers
 
             _player.Color = _lighting.CalculateLighting(_player.Position);
             _player.Draw();
-            //DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(rockPos))); // doesnt seem to work correctly
+            DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position))); // doesnt seem to work correctly
             //_player.DrawPositionDebug();
 
             _rocks.Color = _lighting.CalculateLighting(rockPos);

@@ -129,7 +129,7 @@ namespace SteeringAssignment_real.Mangers
             }
 
             // Return the nearest grid point
-            return new Point(nearestColumn, nearestRow);
+            return new Point(nearestRow, nearestColumn);
         }
 
     }
