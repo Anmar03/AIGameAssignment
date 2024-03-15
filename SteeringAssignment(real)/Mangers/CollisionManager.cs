@@ -19,19 +19,19 @@ namespace SteeringAssignment_real.Mangers
             {
                 foreach (var entity in gameManager._entities)
                 {
-                    // Calculate the distance between the center of the obstacle and the center of the entity
+                    // Distance between the center of the obstacle and the center of the entity
                     float distanceX = Math.Abs(obstacle.Position.X - entity.Position.X);
                     float distanceY = Math.Abs(obstacle.Position.Y - entity.Position.Y);
 
-                    // Calculate the minimum distance between the centers required to detect a collision
+                    // Min distance between the centers required to detect a collision
                     float minDistanceX = obstacle.width / 2 + entity.width / 3;
                     float minDistanceY = obstacle.height / 2 + entity.height / 3;
 
-                    // Check if a collision has occurred along both axes
+                    // If a collision has occurred along both axes
                     if (distanceX < minDistanceX && distanceY < minDistanceY)
                     {
                         // Handle the collision (for example, prevent the entity from moving)
-                        // Here, we simply adjust the entity's position to move it outside the obstacle
+                        // Adjust the entity's position to move it outside the obstacle
                         float overlapX = minDistanceX - distanceX;
                         float overlapY = minDistanceY - distanceY;
 
@@ -109,7 +109,7 @@ namespace SteeringAssignment_real.Mangers
                                     entityA.Position.Y += overlapY / 2;
                                     entityB.Position.Y -= overlapY / 2;
                                 }
-                            }// end else
+                            }// e nd else
 
                         } // end inner if
 

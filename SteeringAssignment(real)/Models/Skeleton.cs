@@ -23,9 +23,10 @@ namespace SteeringAssignment_real.Models
         public Vector2 origin;
         Texture2D attackTexture;
         public bool attacking = false;
-        private float pushForce = 600;
+        private const float pushForce = 600;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0.8f;
+        private const float attackDamage = 2.0f;
 
         public Skeleton(Texture2D texture, Vector2 position) : base(texture, position)
         {
@@ -89,8 +90,8 @@ namespace SteeringAssignment_real.Models
                 case SkeletonState.Attacking:
                     _attackAnimation.Update(animationKey);
 
-                    // if in the middle of animation, push the player
-                    if (_attackAnimation.CurrentFrame == 3) 
+                    // if in the middle of animation and still close, push the player line 128
+                    if (_attackAnimation.CurrentFrame == 3 && distance < width) 
                     {
                         pushDirection = Vector2.Normalize(_player.Position - Position) * pushForce;
                     }
@@ -117,16 +118,17 @@ namespace SteeringAssignment_real.Models
                         attackDelayTimer -= Globals.Time;
                         if (attackDelayTimer <= 0)
                         {
-                            attackDelayTimer = 0; // Ensure timer doesn't go below zero
+                            attackDelayTimer = 0; 
                             currentState = SkeletonState.Idle; // Return to idle state after cooldown
                         }
                     }
                     break;
             }
 
-            if (pushDirection != Vector2.Zero)
+            if (pushDirection != Vector2.Zero && _player.health > 0)
             {
-                _player.Position += pushDirection * Globals.Time; // Adjust player's position with push direction
+                _player.health -= attackDamage;
+                _player.Position += pushDirection * Globals.Time; 
                 pushDirection = Vector2.Zero;
             }
         }

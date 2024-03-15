@@ -9,7 +9,6 @@ namespace SteeringAssignment_real_
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
-        private GraphicsDevice graphicsDevice;
         private SpriteBatch _spriteBatch;
         private GameManager _gameManager;
         private CollisionManager _collisionManager;
@@ -23,7 +22,9 @@ namespace SteeringAssignment_real_
         protected override void Initialize()
         {
             Globals.WindowSize = new(1024, 768);
-            graphicsDevice = GraphicsDevice;
+            Globals.GraphicsDevice = GraphicsDevice;
+            Globals.Graphics = _graphics;
+            Globals.Initialize();
 
             _graphics.PreferredBackBufferWidth = Globals.WindowSize.X;
             _graphics.PreferredBackBufferHeight = Globals.WindowSize.Y;
@@ -57,7 +58,7 @@ namespace SteeringAssignment_real_
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-            _gameManager.Draw(graphicsDevice);
+            _gameManager.Draw();
 
             base.Draw(gameTime);
         }

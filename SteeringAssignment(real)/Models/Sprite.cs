@@ -30,9 +30,9 @@ namespace SteeringAssignment_real.Models
             Globals.SpriteBatch.Draw(_texture, Position, null, Color, 0f, Origin, 1f, SpriteEffects.None, 0f);
         }
 
-        public void DrawPositionDebug(GraphicsDevice graphicsDevice)
+        public void DrawPositionDebug()
         {
-            pixelTexture = new Texture2D(graphicsDevice, 1, 1);
+            pixelTexture = new Texture2D(Globals.GraphicsDevice, 1, 1);
             pixelTexture.SetData(new Color[] { Color.White });
 
             float radius = 5f;
