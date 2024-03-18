@@ -35,6 +35,21 @@ namespace SteeringAssignment_real.Mangers
             }
         }
 
+        public void UpdateDeath(object key)
+        {
+            if (_anims.TryGetValue(key, out Animation value))
+            {
+                value.Start();
+                _anims[key].Update();
+                _lastKey = key;
+                CurrentFrame = _anims[key].CurrentFrameIndex;
+            }
+            else
+            {
+                _anims[_lastKey].Stop();
+            }
+        }
+
         public void Draw(Vector2 position, Color lighting)
         {
             _anims[_lastKey].Draw(position, lighting);

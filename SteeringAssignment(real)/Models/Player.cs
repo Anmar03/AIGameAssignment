@@ -21,7 +21,7 @@ namespace SteeringAssignment_real.Models
         private float frameWidth, frameHeight;
         public Vector2 origin;
         private Texture2D fistAttackTexture;
-        private const float pushForce = 600;
+        private const float punchPushForce = 700;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0f;
         private const float attackDamage = 2.0f;
@@ -113,7 +113,7 @@ namespace SteeringAssignment_real.Models
                     // if in the middle of animation and still close, push the player line 128
                     if (_fistAttackAnim.CurrentFrame == 5 && distance < width + width/2)
                     {
-                        pushDirection = direction * pushForce;
+                        pushDirection = direction * punchPushForce;
                     }
                     
                     if (_fistAttackAnim.CurrentFrame == _fistAttackAnim.TotalFrames - 1)

@@ -20,14 +20,15 @@ namespace SteeringAssignment_real.Models
         private Animation frame;
         private readonly AnimationManager _anims = new();
         private readonly AnimationManager _attackAnimation = new();
+        private readonly AnimationManager _deadAnimation = new();
         private float frameWidth, frameHeight;
         public Vector2 origin;
         Texture2D attackTexture;
+        Texture2D deadTexture;
         private const float pushForce = 600;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0.8f;
         private const float attackDamage = 2.0f;
-        
 
         public Skeleton(Texture2D texture, Vector2 position) : base(texture, position)
         {
@@ -51,6 +52,16 @@ namespace SteeringAssignment_real.Models
             _attackAnimation.AddAnimation(new Vector2(1, 1), new Animation(attackTexture, 8, 8, 0.1f, 6));
             _attackAnimation.AddAnimation(new Vector2(1, -1), new Animation(attackTexture, 8, 8, 0.1f, 4));
 
+            deadTexture = Globals.Content.Load<Texture2D>("skeleton_die");
+            _deadAnimation.AddAnimation(new Vector2(0, 1), new Animation(deadTexture, 8, 8, 0.1f, 7));
+            _deadAnimation.AddAnimation(new Vector2(-1, 0), new Animation(deadTexture, 8, 8, 0.1f, 1));
+            _deadAnimation.AddAnimation(new Vector2(1, 0), new Animation(deadTexture, 8, 8, 0.1f, 5));
+            _deadAnimation.AddAnimation(new Vector2(0, -1), new Animation(deadTexture, 8, 8, 0.1f, 3));
+            _deadAnimation.AddAnimation(new Vector2(-1, 1), new Animation(deadTexture, 8, 8, 0.1f, 8));
+            _deadAnimation.AddAnimation(new Vector2(-1, -1), new Animation(deadTexture, 8, 8, 0.1f, 2));
+            _deadAnimation.AddAnimation(new Vector2(1, 1), new Animation(deadTexture, 8, 8, 0.1f, 6));
+            _deadAnimation.AddAnimation(new Vector2(1, -1), new Animation(deadTexture, 8, 8, 0.1f, 4));
+
             Health = 50f;
         }
 
@@ -72,7 +83,7 @@ namespace SteeringAssignment_real.Models
             object animationKey = AnimationManager.GetAnimationKey(directionToTarget);
             Vector2 pushDirection = Vector2.Zero;
 
-            if (Health <= 0)
+            if (Health <= 0 && currentState != SkeletonState.Dead)
             {
                 currentState = SkeletonState.Dead;
             }
@@ -87,9 +98,10 @@ namespace SteeringAssignment_real.Models
                         _attackAnimation.Reset(); // Reset attack animation to start from the beginning
                     }
                     else
-                    {
-                        // Move towards the target
+                    {    
                         _anims.Update(animationKey);
+
+                        // Move towards the target
                         Position += directionToTarget * speed * Globals.Time;
                         Position = Vector2.Clamp(Position, _minPos, _maxPos);
                     }
@@ -133,7 +145,20 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case SkeletonState.Dead:
+                    
                     Position = Vector2.Clamp(Position, _minPos, _maxPos);
+                    
+
+                    if (_deadAnimation.CurrentFrame == _deadAnimation.TotalFrames - 1) // when animation done the skeleton stands back up. Need to stay on last frame
+                    {
+                        _deadAnimation.UpdateDeath(Vector2.Zero);
+                    }
+                    else
+                    {
+                        _deadAnimation.Update(animationKey);
+                    }
+                    
+
                     break;
             }
 
@@ -162,7 +187,7 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case SkeletonState.Dead:
-                    _anims.Draw(Position - origin, Color);
+                    _deadAnimation.Draw(Position - origin, Color);
                     break;
             }
         } // end draw
