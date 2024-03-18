@@ -9,6 +9,7 @@ namespace SteeringAssignment_real.Mangers
     public class GameManager
     {
         private readonly Map _map;
+        private readonly CollisionManager _collisionManager;
         public readonly GridMap _gridMap;
         private readonly Lighting _lighting;
         private readonly Player _player;
@@ -26,8 +27,9 @@ namespace SteeringAssignment_real.Mangers
         public GameManager()
         {
             _map = new Map();
+            _collisionManager = new CollisionManager(this);
 
-            _player = new Player(Globals.Content.Load<Texture2D>("playerEight"), Center);
+            _player = new Player(Globals.Content.Load<Texture2D>("walknew"), Center);
             _player.SetBounds(_map.MapSize, _map.TileSize);
             _entities = new List<Sprite>{_player};
 
@@ -63,11 +65,12 @@ namespace SteeringAssignment_real.Mangers
         public void Update()
         {
             InputManager.Update();
-            _player.Update();
+            _player.Update(_collisionManager);
             _torchLight.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
             _skeleton.Update(_player);
 
             CalculateTranslation();
+            _collisionManager.Update();
         }
 
         public void Draw()
@@ -76,14 +79,14 @@ namespace SteeringAssignment_real.Mangers
             _map.Draw(_lighting);
             _gridMap.Draw();
 
-            _player.Color = _lighting.CalculateLighting(_player.Position);
-            _player.Draw();
-            DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position))); // doesnt seem to work correctly
-            //_player.DrawPositionDebug();
-
             _rocks.Color = _lighting.CalculateLighting(rockPos);
             _rocks.Draw();
-            _rocks.DrawPositionDebug();
+            //_rocks.DrawPositionDebug();
+
+            _player.Color = _lighting.CalculateLighting(_player.Position);
+            _player.Draw();
+            DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position))); 
+            //_player.DrawPositionDebug();
 
             _skeleton.Color = _lighting.CalculateLighting(_skeleton.Position);
             _skeleton.Draw();

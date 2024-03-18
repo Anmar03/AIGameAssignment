@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using SharpDX.Direct3D9;
 using System;
+using System.Linq;
 
 namespace SteeringAssignment_real.Mangers
 {
@@ -121,5 +122,58 @@ namespace SteeringAssignment_real.Mangers
 
         }// end function
 
+        public (float distance, Vector2 direction, float health, Vector2 enemyPosition) ClosestEntityInfo(Vector2 position)
+        {
+            // Find the closest entity to the given position
+            var closestEntity = gameManager._entities
+                .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
+                .Where(entity => entity.Position != position)
+                .FirstOrDefault();
+
+            if (closestEntity != null)
+            {
+                // Calculate the distance between the given position and the closest entity
+                float distance = Vector2.Distance(closestEntity.Position, position);
+
+                // Calculate the normalized direction from the given position to the closest entity
+                Vector2 direction = Vector2.Normalize(closestEntity.Position - position);
+
+                float health = closestEntity.Health;
+
+                Vector2 enemyPosition = closestEntity.Position;
+
+                // Return the distance and direction as a tuple
+                return (distance, direction, health, enemyPosition);
+            }
+
+            // If no entities exist, return default values
+            return (-1f, Vector2.Zero, 0, Vector2.Zero);
+        }
+
+        public void setClosestEntityHealth(Vector2 position, float health)
+        {
+            var closestEntity = gameManager._entities
+                .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
+                .Where(entity => entity.Position != position)
+                .FirstOrDefault();
+
+            if (closestEntity != null)
+            {
+                closestEntity.Health = health;
+            }
+        }
+
+        public void setClosestEntityPosition(Vector2 position, Vector2 newPosition)
+        {
+            var closestEntity = gameManager._entities
+                .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
+                .Where(entity => entity.Position != position)
+                .FirstOrDefault();
+
+            if (closestEntity != null)
+            {
+                closestEntity.Position += newPosition * Globals.Time;
+            }
+        }
     }
 }

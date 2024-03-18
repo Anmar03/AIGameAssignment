@@ -14,6 +14,7 @@ namespace SteeringAssignment_real.Models
         public Color Color { get; set; }
 
         public float width, height;
+        public float Health;
 
         public Sprite(Texture2D texture, Vector2 position)
         {

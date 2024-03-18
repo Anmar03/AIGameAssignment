@@ -9,7 +9,8 @@ namespace SteeringAssignment_real.Models
     {
         Idle,
         Attacking,
-        Cooldown
+        Cooldown,
+        Dead
     }
     public class Skeleton : Sprite
     {
@@ -22,11 +23,11 @@ namespace SteeringAssignment_real.Models
         private float frameWidth, frameHeight;
         public Vector2 origin;
         Texture2D attackTexture;
-        public bool attacking = false;
         private const float pushForce = 600;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0.8f;
         private const float attackDamage = 2.0f;
+        
 
         public Skeleton(Texture2D texture, Vector2 position) : base(texture, position)
         {
@@ -49,6 +50,8 @@ namespace SteeringAssignment_real.Models
             _attackAnimation.AddAnimation(new Vector2(-1, -1), new Animation(attackTexture, 8, 8, 0.1f, 2));
             _attackAnimation.AddAnimation(new Vector2(1, 1), new Animation(attackTexture, 8, 8, 0.1f, 6));
             _attackAnimation.AddAnimation(new Vector2(1, -1), new Animation(attackTexture, 8, 8, 0.1f, 4));
+
+            Health = 50f;
         }
 
         public void SetBounds(Point mapSize, Point tileSize)
@@ -59,15 +62,20 @@ namespace SteeringAssignment_real.Models
             height = frameHeight;
             origin = new Vector2(frameWidth / 2, frameHeight / 2);
 
-            _minPos = new((-tileSize.X / 2) + frameWidth / 2, (-tileSize.Y / 2) + frameHeight / 2);
-            _maxPos = new(mapSize.X - (tileSize.X / 2) - frameWidth / 2, mapSize.Y - (tileSize.X / 2) - frameHeight / 2);
+            _minPos = new((-tileSize.X / 2) + frameWidth / 4, (-tileSize.Y / 2) + frameHeight / 3);
+            _maxPos = new(mapSize.X - (tileSize.X / 2) - frameWidth / 4, mapSize.Y - (tileSize.X / 2) - frameHeight / 3);
         }
         public void Update(Player _player)
         {
             float distance = Vector2.Distance(Position, _player.Position);
             var directionToTarget = _player.Position - Position; directionToTarget.Normalize();
-            object animationKey = GetAnimationKey(directionToTarget);
+            object animationKey = AnimationManager.GetAnimationKey(directionToTarget);
             Vector2 pushDirection = Vector2.Zero;
+
+            if (Health <= 0)
+            {
+                currentState = SkeletonState.Dead;
+            }
 
             switch (currentState)
             {
@@ -123,24 +131,18 @@ namespace SteeringAssignment_real.Models
                         }
                     }
                     break;
+
+                case SkeletonState.Dead:
+                    Position = Vector2.Clamp(Position, _minPos, _maxPos);
+                    break;
             }
 
-            if (pushDirection != Vector2.Zero && _player.health > 0)
+            if (pushDirection != Vector2.Zero && _player.Health > 0)
             {
-                _player.health -= attackDamage;
+                _player.Health -= attackDamage;
                 _player.Position += pushDirection * Globals.Time; 
                 pushDirection = Vector2.Zero;
             }
-        }
-
-        // Method to convert the direction vector to an animation key object
-        private Vector2 GetAnimationKey(Vector2 direction)
-        {
-            // Round the direction vector components to -1, 0, or 1
-            int x = Math.Sign(direction.X);
-            int y = Math.Sign(direction.Y);
-
-            return new Vector2(x, y);
         }
 
         public override void Draw()
@@ -156,6 +158,10 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case SkeletonState.Cooldown:
+                    _anims.Draw(Position - origin, Color);
+                    break;
+
+                case SkeletonState.Dead:
                     _anims.Draw(Position - origin, Color);
                     break;
             }

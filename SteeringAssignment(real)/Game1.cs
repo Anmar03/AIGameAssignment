@@ -11,7 +11,6 @@ namespace SteeringAssignment_real_
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private GameManager _gameManager;
-        private CollisionManager _collisionManager;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -32,7 +31,6 @@ namespace SteeringAssignment_real_
 
             Globals.Content = Content;
             _gameManager = new();
-            _collisionManager = new(_gameManager);
 
             base.Initialize();
         }
@@ -50,7 +48,6 @@ namespace SteeringAssignment_real_
 
             Globals.Update(gameTime);
             _gameManager.Update();
-            _collisionManager.Update();
 
             base.Update(gameTime);
         }
