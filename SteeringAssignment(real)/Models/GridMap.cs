@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 
 namespace SteeringAssignment_real.Mangers
 {
@@ -11,14 +12,13 @@ namespace SteeringAssignment_real.Mangers
         private Point[,] _grid;
         public Point[,] Grid => _grid;
         public Point rowCol { get; private set; }
-        private readonly Point emptyPoint = new Point(0, 0);
-        float radius;
+        public float radius;
 
         public GridMap(GameManager gameManager, Map map)
         {
             _gameManager = gameManager;
             _map = map;
-            radius = 20;
+            radius = 80;
             GenerateGrid(30, 36);
         }
 
@@ -35,9 +35,7 @@ namespace SteeringAssignment_real.Mangers
                     int posX = x * (_map.MapSize.X / columns);
                     int posY = y * (_map.MapSize.Y / rows);
 
-
                     _grid[y, x] = new Point(posX, posY);
-                    
                 }
             }
         }
@@ -59,7 +57,6 @@ namespace SteeringAssignment_real.Mangers
                         {
                             DrawLine(start, end, Color.Black);
                         }
-
                     }
 
                     // Draw vertical line
@@ -72,7 +69,6 @@ namespace SteeringAssignment_real.Mangers
                         {
                             DrawLine(start, end, Color.Black);
                         }
-                            
                     }
                 }
             }
@@ -91,15 +87,15 @@ namespace SteeringAssignment_real.Mangers
         {
             int row = rC.X;
             int column = rC.Y;
+
             // Check if the provided row and column indices are within the valid range
-            if (row >= 0 && row < rowCol.Y && column >= 0 && column < rowCol.X)
+            if (row >= 0 && row < rowCol.X && column >= 0 && column < rowCol.Y)
             {
                 // Retrieve and return the position of the specified grid point
                 return new Vector2(_grid[row, column].X + _map.TileSize.X / 2, _grid[row, column].Y + _map.TileSize.Y / 2);
             }
             else
             {
-                // Return Vector2.Zero or throw an exception to indicate invalid indices
                 return Vector2.Zero;
             }
         }
@@ -110,16 +106,16 @@ namespace SteeringAssignment_real.Mangers
             int nearestColumn = -1;
             float minDistanceSquared = float.MaxValue;
 
-            // Iterate through all grid points to find the nearest one
             for (int row = 0; row < _grid.GetLength(0); row++)
             {
                 for (int column = 0; column < _grid.GetLength(1); column++)
                 {
-                    // Calculate the distance squared between the current grid point and the given position
-                    float distanceSquared = Vector2.DistanceSquared(position, new Vector2(_grid[row, column].X + _map.TileSize.X / 2, _grid[row, column].Y + _map.TileSize.Y / 2));
+                    // Distance squared between the current grid point and the given position
+                    Vector2 gridPoint = new Vector2(_grid[row, column].X + _map.TileSize.X / 2, _grid[row, column].Y + _map.TileSize.Y / 2);
+                    float distanceSquared = Vector2.DistanceSquared(position, gridPoint);
 
-                    // Update the nearest grid point if this grid point is closer
-                    if (distanceSquared < minDistanceSquared)
+                    // Update the nearest grid point if this grid point is closer and not an obstacle position
+                    if (distanceSquared < minDistanceSquared && !_gameManager.obstacleProximity(gridPoint, radius))
                     {
                         minDistanceSquared = distanceSquared;
                         nearestRow = row;
@@ -131,6 +127,42 @@ namespace SteeringAssignment_real.Mangers
             // Return the nearest grid point
             return new Point(nearestRow, nearestColumn);
         }
+
+    
+        public List<Point> GetNeighbouringPoints(Vector2 position)
+        {
+            Point gridPosition = GetNearestGridPoint(position);
+
+            List<Point> neighbouringPoints = new List<Point>();
+
+            // if neighbouring points are within grid boundaries, add them
+            if (gridPosition.X + 1 < rowCol.Y)
+                neighbouringPoints.Add(new Point(gridPosition.X + 1, gridPosition.Y));
+
+            if (gridPosition.Y + 1 < rowCol.X)
+                neighbouringPoints.Add(new Point(gridPosition.X, gridPosition.Y + 1));
+
+            if (gridPosition.X + 1 < rowCol.Y && gridPosition.Y + 1 < rowCol.X)
+                neighbouringPoints.Add(new Point(gridPosition.X + 1, gridPosition.Y + 1));
+
+            if (gridPosition.X - 1 >= 0 && gridPosition.Y + 1 < rowCol.X)
+                neighbouringPoints.Add(new Point(gridPosition.X - 1, gridPosition.Y + 1));
+
+            if (gridPosition.X - 1 >= 0)
+                neighbouringPoints.Add(new Point(gridPosition.X - 1, gridPosition.Y));
+
+            if (gridPosition.Y - 1 >= 0)
+                neighbouringPoints.Add(new Point(gridPosition.X, gridPosition.Y - 1));
+
+            if (gridPosition.X - 1 >= 0 && gridPosition.Y - 1 >= 0)
+                neighbouringPoints.Add(new Point(gridPosition.X - 1, gridPosition.Y - 1));
+
+            if (gridPosition.X + 1 < rowCol.Y && gridPosition.Y - 1 >= 0)
+                neighbouringPoints.Add(new Point(gridPosition.X + 1, gridPosition.Y - 1));
+
+            return neighbouringPoints;
+        }
+
 
     }
 }

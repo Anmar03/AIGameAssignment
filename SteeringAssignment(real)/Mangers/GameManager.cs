@@ -12,9 +12,9 @@ namespace SteeringAssignment_real.Mangers
         private readonly CollisionManager _collisionManager;
         public readonly GridMap _gridMap;
         private readonly Lighting _lighting;
-        private readonly Player _player;
+        public readonly Player _player;
         private readonly Light _torchLight;
-        private readonly Skeleton _skeleton;
+        private readonly List<Skeleton> _skeletons;
         private readonly Obstacle _rocks;
         private readonly UIManager _uiManager;
         public List<Obstacle> _obstacles;
@@ -29,14 +29,6 @@ namespace SteeringAssignment_real.Mangers
             _map = new Map();
             _collisionManager = new CollisionManager(this);
 
-            _player = new Player(Globals.Content.Load<Texture2D>("walknew"), Center);
-            _player.SetBounds(_map.MapSize, _map.TileSize);
-            _entities = new List<Sprite>{_player};
-
-            _skeleton = new Skeleton(Globals.Content.Load<Texture2D>("skeleton_walk"), Center / 2);
-            _skeleton.SetBounds(_map.MapSize, _map.TileSize);
-            _entities.Add(_skeleton);
-
             // Obstacles
             _obstacles = new List<Obstacle>();
             _rocks = new Obstacle(Globals.Content.Load<Texture2D>("Rocks"), rockPos);
@@ -44,8 +36,15 @@ namespace SteeringAssignment_real.Mangers
 
             _gridMap = new GridMap(this, _map);
 
+            _player = new Player(Globals.Content.Load<Texture2D>("walknew"), Center);
+            _player.SetBounds(_map.MapSize, _map.TileSize);
+            _entities = new List<Sprite>{_player};
+
+            _skeletons = new List<Skeleton>();
+            GenerateSkeletons(1);
+
             _lighting = new Lighting();
-            _torchLight = new Light(new Vector2(_player.Position.X - _player.origin.X * 2, _player.Position.Y - _player.origin.Y * 2), 600, 0.8f);
+            _torchLight = new Light(new Vector2(_player.Position.X - _player.origin.X * 2, _player.Position.Y - _player.origin.Y * 2), 600, 0.9f);
             _lighting.AddLight(_torchLight);
 
             _uiManager = new UIManager(_player);
@@ -67,7 +66,11 @@ namespace SteeringAssignment_real.Mangers
             InputManager.Update();
             _player.Update(_collisionManager);
             _torchLight.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
-            _skeleton.Update(_player);
+            
+            foreach (var skeleton in _skeletons)
+            {
+                skeleton.Update(_player);
+            }
 
             CalculateTranslation();
             _collisionManager.Update();
@@ -81,21 +84,37 @@ namespace SteeringAssignment_real.Mangers
 
             _rocks.Color = _lighting.CalculateLighting(rockPos);
             _rocks.Draw();
-            //_rocks.DrawPositionDebug();
 
             _player.Color = _lighting.CalculateLighting(_player.Position);
             _player.Draw();
-            DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position))); 
+            //DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position)));
             //_player.DrawPositionDebug();
 
-            _skeleton.Color = _lighting.CalculateLighting(_skeleton.Position);
-            _skeleton.Draw();
+            foreach (var skeleton in _skeletons)
+            {
+                skeleton.Color = _lighting.CalculateLighting(skeleton.Position);
+                skeleton.Draw();
+            }
 
             Globals.SpriteBatch.End();
 
             _uiManager.Color = _lighting.CalculateLighting(_player.Position);
             _uiManager.Draw();
             
+        }
+
+        private void GenerateSkeletons(int count)
+        {
+            Random random = new Random();
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 randomPosition = new Vector2(random.Next((int)_map.MapSize.X), random.Next((int)_map.MapSize.Y));
+                Skeleton skeleton = new Skeleton(Globals.Content.Load<Texture2D>("skeleton_walk"), randomPosition, this);
+                skeleton.SetBounds(_map.MapSize, _map.TileSize);
+                _skeletons.Add(skeleton);
+                _entities.Add(skeleton);
+            }
         }
 
         // Method to get all obstacles within a radius of a position

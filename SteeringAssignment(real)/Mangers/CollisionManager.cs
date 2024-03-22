@@ -25,8 +25,8 @@ namespace SteeringAssignment_real.Mangers
                     float distanceY = Math.Abs(obstacle.Position.Y - entity.Position.Y);
 
                     // Min distance between the centers required to detect a collision
-                    float minDistanceX = obstacle.width / 2 + entity.width / 3;
-                    float minDistanceY = obstacle.height / 2 + entity.height / 3;
+                    float minDistanceX = obstacle.width / 3 + entity.width / 3;
+                    float minDistanceY = obstacle.height / 2 + entity.height / 4;
 
                     // If a collision has occurred along both axes
                     if (distanceX < minDistanceX && distanceY < minDistanceY)

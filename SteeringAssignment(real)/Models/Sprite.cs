@@ -45,6 +45,20 @@ namespace SteeringAssignment_real.Models
             DrawCircle(debugPosition, radius, debugColor);
         }
 
+        public void DrawPositionDebug(Vector2 pos)
+        {
+            pixelTexture = new Texture2D(Globals.GraphicsDevice, 1, 1);
+            pixelTexture.SetData(new Color[] { Color.White });
+
+            float radius = 5f;
+
+            Color debugColor = Color.Red;
+
+            Vector2 debugPosition = pos;
+
+            DrawCircle(debugPosition, radius, debugColor);
+        }
+
         // Helper method to draw a circle
         private void DrawCircle(Vector2 position, float radius, Color color)
         {

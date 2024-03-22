@@ -18,13 +18,16 @@ namespace SteeringAssignment_real.Models
         private Animation frame;
         private readonly AnimationManager _anims = new();
         private readonly AnimationManager _fistAttackAnim = new();
+        private readonly AnimationManager _swordAttackAnim = new();
         private float frameWidth, frameHeight;
         public Vector2 origin;
         private Texture2D fistAttackTexture;
+        private Texture2D swordAttackTexture;
         private const float punchPushForce = 700;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0f;
-        private const float attackDamage = 2.0f;
+        private const float fistAttackDamage = 2.0f;
+        private const float swordAttackDamage = 5.0f;
         private object lastKey;
 
 
@@ -51,6 +54,16 @@ namespace SteeringAssignment_real.Models
             _fistAttackAnim.AddAnimation(new Vector2(-1, -1), new Animation(fistAttackTexture, 9, 8, 0.1f, 8)); // WA
             _fistAttackAnim.AddAnimation(new Vector2(1, 1), new Animation(fistAttackTexture, 9, 8, 0.1f, 4)); // SD
             _fistAttackAnim.AddAnimation(new Vector2(1, -1), new Animation(fistAttackTexture, 9, 8, 0.1f, 2)); // WD
+
+            swordAttackTexture = Globals.Content.Load<Texture2D>("shword_attack");
+            _swordAttackAnim.AddAnimation(new Vector2(0, 1), new Animation(swordAttackTexture, 9, 8, 0.1f, 5)); // S
+            _swordAttackAnim.AddAnimation(new Vector2(-1, 0), new Animation(swordAttackTexture, 9, 8, 0.1f, 7)); // A
+            _swordAttackAnim.AddAnimation(new Vector2(1, 0), new Animation(swordAttackTexture, 9, 8, 0.1f, 3)); // D
+            _swordAttackAnim.AddAnimation(new Vector2(0, -1), new Animation(swordAttackTexture, 9, 8, 0.1f, 1)); // W
+            _swordAttackAnim.AddAnimation(new Vector2(-1, 1), new Animation(swordAttackTexture, 9, 8, 0.1f, 6)); // SA
+            _swordAttackAnim.AddAnimation(new Vector2(-1, -1), new Animation(swordAttackTexture, 9, 8, 0.1f, 8)); // WA
+            _swordAttackAnim.AddAnimation(new Vector2(1, 1), new Animation(swordAttackTexture, 9, 8, 0.1f, 4)); // SD
+            _swordAttackAnim.AddAnimation(new Vector2(1, -1), new Animation(swordAttackTexture, 9, 8, 0.1f, 2)); // WD
         }
 
         public void SetBounds(Point mapSize, Point tileSize)
@@ -80,6 +93,9 @@ namespace SteeringAssignment_real.Models
             {
                 currentState = PlayerState.FistAttack; 
             }
+
+            // to do : ADD STATEMENT TO CHECK IF LEFT MOUSEBUTTON PRESSED.
+
 
             switch (currentState)
             {
@@ -131,7 +147,7 @@ namespace SteeringAssignment_real.Models
 
             if (pushDirection != Vector2.Zero && enemyHealth > 0)
             {
-                enemyHealth -= attackDamage;
+                enemyHealth -= fistAttackDamage;
                 collisionManager.setClosestEntityHealth(Position, enemyHealth);
                 enemyPosition += pushDirection;
                 collisionManager.setClosestEntityPosition(Position, pushDirection);
