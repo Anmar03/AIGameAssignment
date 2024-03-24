@@ -21,6 +21,8 @@ namespace SteeringAssignment_real.Mangers
 
         public void Update(object key)
         {
+            key ??= new Vector2(0, 1); // S Key is the default direction incase the player attacks before moving
+
             if (_anims.TryGetValue(key, out Animation value))
             {
                 value.Start();

@@ -15,7 +15,6 @@ namespace SteeringAssignment_real.Models
         private bool _active = true;
         public int frameWidth;
         public int frameHeight;
-
         public int CurrentFrameIndex => _frame;
         public int FrameCount => _frames;
 

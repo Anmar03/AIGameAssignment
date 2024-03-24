@@ -8,6 +8,7 @@ namespace SteeringAssignment_real.Models
     {
         Walk,
         FistAttack,
+        SwordAttack,
         Dead
     }
     public class Player : Sprite
@@ -15,21 +16,22 @@ namespace SteeringAssignment_real.Models
         private PlayerState currentState = PlayerState.Walk;
         private const float speed = 500;
         private Vector2 _minPos, _maxPos;
-        private Animation frame;
+        private readonly Animation frame;
         private readonly AnimationManager _anims = new();
         private readonly AnimationManager _fistAttackAnim = new();
         private readonly AnimationManager _swordAttackAnim = new();
+        private readonly Texture2D fistAttackTexture;
+        private readonly Texture2D swordAttackTexture;
+
         private float frameWidth, frameHeight;
         public Vector2 origin;
-        private Texture2D fistAttackTexture;
-        private Texture2D swordAttackTexture;
         private const float punchPushForce = 700;
-        private float attackDelayTimer = 0;
-        private const float attackDelayDuration = 0f;
+        private const float swordPushForce = 500;
         private const float fistAttackDamage = 2.0f;
         private const float swordAttackDamage = 5.0f;
         private object lastKey;
-
+        private float attackDelayTimer = 0;
+        private const float attackDelayDuration = 0.5f;
 
         public Player(Texture2D texture, Vector2 position) : base(texture, position)
         {
@@ -83,39 +85,36 @@ namespace SteeringAssignment_real.Models
             var result = collisionManager.ClosestEntityInfo(Position);
             float distance = result.distance;
             Vector2 direction = result.direction;
-            Vector2 pushDirection = Vector2.Zero;
             float enemyHealth = result.health;
-            Vector2 enemyPosition = result.enemyPosition;
+            Vector2 pushDirection = Vector2.Zero;
             object animationKey = AnimationManager.GetAnimationKey(InputManager.Direction);
 
             // Check if the spacebar is pressed and the player is in the walking state
-            if (InputManager.SpacebarPressed && currentState == PlayerState.Walk && attackDelayTimer <= 0)
+            if (Health <= 0)
             {
-                currentState = PlayerState.FistAttack; 
+                currentState = PlayerState.Dead;
             }
-
-            // to do : ADD STATEMENT TO CHECK IF LEFT MOUSEBUTTON PRESSED.
-
 
             switch (currentState)
             {
                 case PlayerState.Walk:
-                    if (InputManager.Moving)
-                    {
-                        Position += Vector2.Normalize(InputManager.Direction) * speed * Globals.Time;
-
-                        lastKey = AnimationManager.GetAnimationKey(InputManager.LastDirection);
-                    }
-
-                    if (Health <= 0)
-                    {
-                        currentState = PlayerState.Dead; 
-                        break;
-                    }
-
                     if (attackDelayTimer > 0)
                     {
                         attackDelayTimer -= Globals.Time;
+                    }
+
+                    if (InputManager.Moving)
+                    {
+                        Position += Vector2.Normalize(InputManager.Direction) * speed * Globals.Time;
+                        lastKey = AnimationManager.GetAnimationKey(InputManager.LastDirection);
+                    }
+                    else if (InputManager.SpacebarPressed && attackDelayTimer <= 0)
+                    {
+                        currentState = PlayerState.FistAttack;
+                    }
+                    else if (InputManager.F_keyPressed && attackDelayTimer <= 0)
+                    {
+                        currentState = PlayerState.SwordAttack;
                     }
 
                     _anims.Update(animationKey);
@@ -126,7 +125,7 @@ namespace SteeringAssignment_real.Models
                     _fistAttackAnim.Update(lastKey);
                     Position = Vector2.Clamp(Position, _minPos, _maxPos);
 
-                    // if in the middle of animation and still close, push the player line 128
+                    // if in the middle of animation and still close, push the player line 128 TO-DO: ADD CHECK IF PLAYER IS FACING ENEMY
                     if (_fistAttackAnim.CurrentFrame == 5 && distance < width + width/2)
                     {
                         pushDirection = direction * punchPushForce;
@@ -134,26 +133,54 @@ namespace SteeringAssignment_real.Models
                     
                     if (_fistAttackAnim.CurrentFrame == _fistAttackAnim.TotalFrames - 1)
                     {
-                        // Attack animation finished, start cooldown
                         currentState = PlayerState.Walk;
+                        _fistAttackAnim.Reset();
+
+                        attackDelayTimer = attackDelayDuration;
+                    }
+                    break;
+
+                case PlayerState.SwordAttack:
+                    _swordAttackAnim.Update(lastKey);
+                    Position = Vector2.Clamp(Position, _minPos, _maxPos);
+
+                    if (_swordAttackAnim.CurrentFrame == 4 && distance < width + width/2)
+                    {
+                        pushDirection = direction * swordPushForce;
+                    }
+
+                    if (_swordAttackAnim.CurrentFrame == _swordAttackAnim.TotalFrames - 1)
+                    {
+                        currentState = PlayerState.Walk;
+                        _swordAttackAnim.Reset();
+
                         attackDelayTimer = attackDelayDuration;
                     }
                     break;
 
                 case PlayerState.Dead:
-
                 break;
             }
 
             if (pushDirection != Vector2.Zero && enemyHealth > 0)
             {
-                enemyHealth -= fistAttackDamage;
+                enemyHealth -= GetAttackDamage();
                 collisionManager.setClosestEntityHealth(Position, enemyHealth);
-                enemyPosition += pushDirection;
                 collisionManager.setClosestEntityPosition(Position, pushDirection);
-
-                pushDirection = Vector2.Zero;
             }
+        }
+
+        private float GetAttackDamage()
+        {
+            switch (currentState)
+            {
+                case PlayerState.FistAttack:
+                    return fistAttackDamage;
+                    
+                case PlayerState.SwordAttack:
+                    return swordAttackDamage;
+            }
+            return -1;
         }
 
         public override void Draw()
@@ -168,11 +195,15 @@ namespace SteeringAssignment_real.Models
                     _fistAttackAnim.Draw(Position - origin, Color);
                     break;
 
+                case PlayerState.SwordAttack:
+                    _swordAttackAnim.Draw(Position - origin, Color);
+                    break;
+
                 case PlayerState.Dead:
                     _fistAttackAnim.Draw(Position - origin, Color);
                     string message = "YOU ARE DEAD!";
                     Vector2 messageSize = Globals.Font.MeasureString(message);
-                    Vector2 messagePosition = new Vector2((Position.X - messageSize.X / 2), (Position.Y - messageSize.Y * 2));
+                    Vector2 messagePosition = new((Position.X - messageSize.X / 2), (Position.Y - messageSize.Y * 2));
                     Globals.SpriteBatch.DrawString(Globals.Font, message, messagePosition, Color.Red);
                     break;
             }

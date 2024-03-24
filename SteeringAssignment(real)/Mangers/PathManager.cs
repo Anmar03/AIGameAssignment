@@ -5,9 +5,9 @@ namespace SteeringAssignment_real.Mangers
 {
     public class PathManager
     {
-        private GameManager gameManager;
-        private GridMap grid;
-        private float radius;
+        private readonly GameManager gameManager;
+        private readonly GridMap grid;
+        private readonly float radius;
         public Vector2 Destination;
         private List<Vector2> shortestPath;
 
@@ -21,12 +21,12 @@ namespace SteeringAssignment_real.Mangers
         public List<Vector2> AStar(Vector2 source, Vector2 destination) 
         {
             Destination = destination;
-            PriorityQueue<Vector2> openSet = new PriorityQueue<Vector2>();
+            PriorityQueue<Vector2> openSet = new();
             shortestPath = new List<Vector2>();
             source = grid.GetGridPointPosition(grid.GetNearestGridPoint(source));
             openSet.Enqueue(source, 1);
 
-            Vector2 current = new Vector2(-1, -1);
+            Vector2 current;
             float distanceSquared;
 
             while (!openSet.IsEmpty)
@@ -48,7 +48,7 @@ namespace SteeringAssignment_real.Mangers
                 { 
                     Vector2 neighbourPosition = grid.GetGridPointPosition(neighbour);
                     // If neighbour is blocked or inside closedSet then move to next neighbour
-                    if (gameManager.obstacleProximity(neighbourPosition, radius) || shortestPath.Contains(neighbourPosition))
+                    if (gameManager.ObstacleProximity(neighbourPosition, radius) || shortestPath.Contains(neighbourPosition))
                     {
                         // Move to next neighbour
                     }

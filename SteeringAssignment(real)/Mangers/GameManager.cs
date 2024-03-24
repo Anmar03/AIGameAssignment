@@ -105,12 +105,12 @@ namespace SteeringAssignment_real.Mangers
 
         private void GenerateSkeletons(int count)
         {
-            Random random = new Random();
+            Random random = new();
 
             for (int i = 0; i < count; i++)
             {
-                Vector2 randomPosition = new Vector2(random.Next((int)_map.MapSize.X), random.Next((int)_map.MapSize.Y));
-                Skeleton skeleton = new Skeleton(Globals.Content.Load<Texture2D>("skeleton_walk"), randomPosition, this);
+                Vector2 randomPosition = new(random.Next((int)_map.MapSize.X), random.Next((int)_map.MapSize.Y));
+                Skeleton skeleton = new(Globals.Content.Load<Texture2D>("skeleton_walk"), randomPosition, this);
                 skeleton.SetBounds(_map.MapSize, _map.TileSize);
                 _skeletons.Add(skeleton);
                 _entities.Add(skeleton);
@@ -118,13 +118,12 @@ namespace SteeringAssignment_real.Mangers
         }
 
         // Method to get all obstacles within a radius of a position
-        public bool obstacleProximity(Vector2 position, float radius)
+        public bool ObstacleProximity(Vector2 position, float radius)
         {
             foreach(var obstacle in _obstacles)
             {
                 float distanceX = Math.Abs(obstacle.Position.X - position.X);
                 float distanceY = Math.Abs(obstacle.Position.Y - position.Y);
-                float distance = Vector2.Distance(position, obstacle.Position);
 
                 float minDistanceX = obstacle.width / 2 + radius;
                 float minDistanceY = obstacle.height / 2 + radius;
