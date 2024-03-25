@@ -15,7 +15,6 @@ namespace SteeringAssignment_real.Mangers
         public static void Update()
         {
             var keyboardState = Keyboard.GetState();
-            var mouseState = Mouse.GetState();
 
             _lastDirection = _direction;
             _direction = Vector2.Zero;

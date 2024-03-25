@@ -41,7 +41,7 @@ namespace SteeringAssignment_real.Mangers
             _entities = new List<Sprite>{_player};
 
             _skeletons = new List<Skeleton>();
-            GenerateSkeletons(1);
+            GenerateSkeletons(3);
 
             _lighting = new Lighting();
             _torchLight = new Light(new Vector2(_player.Position.X - _player.origin.X * 2, _player.Position.Y - _player.origin.Y * 2), 600, 0.9f);

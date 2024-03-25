@@ -8,7 +8,7 @@ namespace SteeringAssignment_real_
 {
     public class Game1 : Game
     {
-        private GraphicsDeviceManager _graphics;
+        private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private GameManager _gameManager;
         public Game1()
@@ -20,7 +20,7 @@ namespace SteeringAssignment_real_
 
         protected override void Initialize()
         {
-            Globals.WindowSize = new(1024, 768);
+            Globals.WindowSize = new(1400, 980);
             Globals.GraphicsDevice = GraphicsDevice;
             Globals.Graphics = _graphics;
             Globals.Initialize();

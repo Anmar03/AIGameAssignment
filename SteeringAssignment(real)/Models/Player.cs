@@ -14,7 +14,7 @@ namespace SteeringAssignment_real.Models
     public class Player : Sprite
     {
         private PlayerState currentState = PlayerState.Walk;
-        private const float speed = 500;
+        private const float speed = 400;
         private Vector2 _minPos, _maxPos;
         private readonly Animation frame;
         private readonly AnimationManager _anims = new();
@@ -82,17 +82,24 @@ namespace SteeringAssignment_real.Models
 
         public void Update(CollisionManager collisionManager)
         {
-            var result = collisionManager.ClosestEntityInfo(Position);
-            float distance = result.distance;
-            Vector2 direction = result.direction;
-            float enemyHealth = result.health;
             Vector2 pushDirection = Vector2.Zero;
             object animationKey = AnimationManager.GetAnimationKey(InputManager.Direction);
+            float distance = 0;
+            Vector2 direction = Vector2.Zero;
+            float enemyHealth = 0;
 
             // Check if the spacebar is pressed and the player is in the walking state
             if (Health <= 0)
             {
                 currentState = PlayerState.Dead;
+            }
+
+            if (currentState == PlayerState.FistAttack || currentState == PlayerState.SwordAttack)
+            {
+                var result = collisionManager.ClosestEntityInfo(Position);
+                distance = result.distance;
+                direction = result.direction;
+                enemyHealth = result.health;
             }
 
             switch (currentState)
@@ -165,8 +172,8 @@ namespace SteeringAssignment_real.Models
             if (pushDirection != Vector2.Zero && enemyHealth > 0)
             {
                 enemyHealth -= GetAttackDamage();
-                collisionManager.setClosestEntityHealth(Position, enemyHealth);
-                collisionManager.setClosestEntityPosition(Position, pushDirection);
+                collisionManager.SetClosestEntityHealth(Position, enemyHealth);
+                collisionManager.SetClosestEntityPosition(Position, pushDirection);
             }
         }
 

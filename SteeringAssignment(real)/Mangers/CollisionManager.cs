@@ -1,6 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
-using SharpDX.Direct3D9;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Linq;
 
@@ -8,7 +6,7 @@ namespace SteeringAssignment_real.Mangers
 {
     public class CollisionManager
     {
-        GameManager gameManager;
+        private readonly GameManager gameManager;
         public CollisionManager(GameManager gameManager) 
         {
             this.gameManager = gameManager;
@@ -150,7 +148,7 @@ namespace SteeringAssignment_real.Mangers
             return (-1f, Vector2.Zero, 0, Vector2.Zero);
         }
 
-        public void setClosestEntityHealth(Vector2 position, float health)
+        public void SetClosestEntityHealth(Vector2 position, float health)
         {
             var closestEntity = gameManager._entities
                 .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
@@ -163,7 +161,7 @@ namespace SteeringAssignment_real.Mangers
             }
         }
 
-        public void setClosestEntityPosition(Vector2 position, Vector2 newPosition)
+        public void SetClosestEntityPosition(Vector2 position, Vector2 newPosition)
         {
             var closestEntity = gameManager._entities
                 .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
