@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SharpDX.Direct2D1;
 using SteeringAssignment_real.Models;
 using System;
 using System.Collections.Generic;
@@ -36,9 +35,6 @@ namespace SteeringAssignment_real
                 }
             }
         }
-
-
-
         public void Draw(Lighting lighting)
         {
             for (int y = 0; y < _mapTileSize.Y; y++)
@@ -49,7 +45,7 @@ namespace SteeringAssignment_real
                     _tiles[x, y].Color = lighting.CalculateLighting(tilePosition);
                     _tiles[x, y].Draw();
                 }
-            }         
+            }
         }
     }
 }

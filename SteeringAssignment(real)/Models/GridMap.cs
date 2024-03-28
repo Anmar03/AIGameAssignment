@@ -18,7 +18,7 @@ namespace SteeringAssignment_real.Mangers
         {
             _gameManager = gameManager;
             _map = map;
-            radius = 80;
+            radius = 60;
             GenerateGrid(30, 36);
         }
 

@@ -20,7 +20,7 @@ namespace SteeringAssignment_real_
 
         protected override void Initialize()
         {
-            Globals.WindowSize = new(1400, 980);
+            Globals.WindowSize = new(1500, 980);
             Globals.GraphicsDevice = GraphicsDevice;
             Globals.Graphics = _graphics;
             Globals.Initialize();

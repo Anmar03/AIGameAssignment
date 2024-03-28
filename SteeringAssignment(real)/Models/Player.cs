@@ -151,7 +151,7 @@ namespace SteeringAssignment_real.Models
                     _swordAttackAnim.Update(lastKey);
                     Position = Vector2.Clamp(Position, _minPos, _maxPos);
 
-                    if (_swordAttackAnim.CurrentFrame == 4 && distance < width + width/2)
+                    if (_swordAttackAnim.CurrentFrame == 4 && distance < width * 2)
                     {
                         pushDirection = direction * swordPushForce;
                     }

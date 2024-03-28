@@ -32,7 +32,7 @@ namespace SteeringAssignment_real.Mangers
         {
             Globals.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, transformMatrix: _uiTransform);
 
-            healthPos = new Vector2(Globals.WindowSize.X * 0.7f, Globals.WindowSize.Y * 0.95f);
+            healthPos = new Vector2(Globals.WindowSize.X * 0.8f, Globals.WindowSize.Y * 0.95f);
 
             for (int i = 0; i < _player.Health / 10; i++)
             {
@@ -46,7 +46,7 @@ namespace SteeringAssignment_real.Mangers
         private void UpdateUITransform()
         {
             // Calculate the UI transformation matrix to keep UI fixed on the screen
-            float uiScale = 0.95f;
+            float uiScale = 1.0f;
             _uiTransform = Matrix.CreateScale(uiScale);
         }
     }
