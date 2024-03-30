@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SteeringAssignment_real.Models;
 
@@ -21,8 +20,8 @@ namespace SteeringAssignment_real.Mangers
             this._player = _player;
 
             healthTextureFull = Globals.Content.Load<Texture2D>("heart-full");
-            healthTextureHalf = Globals.Content.Load<Texture2D>("heart-half");
-            healthTextureEmpty = Globals.Content.Load<Texture2D>("heart-empty");
+            //healthTextureHalf = Globals.Content.Load<Texture2D>("heart-half");
+            //healthTextureEmpty = Globals.Content.Load<Texture2D>("heart-empty");
 
             healthOrigin = new(healthTextureFull.Width / 2, healthTextureFull.Height / 2);
             UpdateUITransform();
@@ -38,6 +37,14 @@ namespace SteeringAssignment_real.Mangers
             {
                 Globals.SpriteBatch.Draw(healthTextureFull, healthPos, null, Color.White, 0f, healthOrigin, 1f, SpriteEffects.None, 0f);
                 healthPos.X += healthTextureFull.Width;
+            }
+
+            if (_player.GetPlayerState() == PlayerState.Dead)
+            {
+                string message = "YOU ARE DEAD!";
+                Vector2 messageSize = Globals.Font.MeasureString(message);
+                Vector2 messagePosition = new((Globals.WindowSize.X/2 - messageSize.X / 2), (Globals.WindowSize.Y/2 - messageSize.Y * 2));
+                Globals.SpriteBatch.DrawString(Globals.Font, message, messagePosition, Color.Red);
             }
 
             Globals.SpriteBatch.End();

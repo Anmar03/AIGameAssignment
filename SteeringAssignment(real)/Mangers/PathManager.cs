@@ -8,19 +8,16 @@ namespace SteeringAssignment_real.Mangers
         private readonly GameManager gameManager;
         private readonly GridMap grid;
         private readonly float radius;
-        public Vector2 Destination;
         
-
         public PathManager(GameManager gameManager) 
         {
             this.gameManager = gameManager;
-            grid = gameManager._gridMap;
-            radius = gameManager._gridMap.radius;
+            grid = gameManager.GetGridMap();
+            radius = grid.radius;
         }
 
         public List<Vector2> AStar(Vector2 source, Vector2 destination)
         {
-            Destination = destination;
             PriorityQueue<Vector2> openSet = new();
             HashSet<Vector2> closedSet = new(); // Closed set to track visited nodes
             Dictionary<Vector2, Vector2> cameFrom = new(); // store parent nodes for path reconstruction

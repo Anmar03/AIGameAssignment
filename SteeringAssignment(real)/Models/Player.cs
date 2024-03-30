@@ -20,11 +20,15 @@ namespace SteeringAssignment_real.Models
         private readonly AnimationManager _anims = new();
         private readonly AnimationManager _fistAttackAnim = new();
         private readonly AnimationManager _swordAttackAnim = new();
+        private readonly AnimationManager _deathAnim = new();
         private readonly Texture2D fistAttackTexture;
         private readonly Texture2D swordAttackTexture;
+        private readonly Texture2D deadTexture;
 
         private float frameWidth, frameHeight;
         public Vector2 origin;
+        private Vector2 direction;
+        public Vector2 playerDirection {  get; private set; }
         private const float punchPushForce = 700;
         private const float swordPushForce = 500;
         private const float fistAttackDamage = 2.0f;
@@ -66,6 +70,16 @@ namespace SteeringAssignment_real.Models
             _swordAttackAnim.AddAnimation(new Vector2(-1, -1), new Animation(swordAttackTexture, 9, 8, 0.1f, 8)); // WA
             _swordAttackAnim.AddAnimation(new Vector2(1, 1), new Animation(swordAttackTexture, 9, 8, 0.1f, 4)); // SD
             _swordAttackAnim.AddAnimation(new Vector2(1, -1), new Animation(swordAttackTexture, 9, 8, 0.1f, 2)); // WD
+
+            deadTexture = Globals.Content.Load<Texture2D>("die2");
+            _deathAnim.AddAnimation(new Vector2(0, 1), new Animation(deadTexture, 13, 8, 0.1f, 5)); // S
+            _deathAnim.AddAnimation(new Vector2(-1, 0), new Animation(deadTexture, 13, 8, 0.1f, 7)); // A
+            _deathAnim.AddAnimation(new Vector2(1, 0), new Animation(deadTexture, 13, 8, 0.1f, 3)); // D
+            _deathAnim.AddAnimation(new Vector2(0, -1), new Animation(deadTexture, 13, 8, 0.1f, 1)); // W
+            _deathAnim.AddAnimation(new Vector2(-1, 1), new Animation(deadTexture, 13, 8, 0.1f, 6)); // SA
+            _deathAnim.AddAnimation(new Vector2(-1, -1), new Animation(deadTexture, 13, 8, 0.1f, 8)); // WA
+            _deathAnim.AddAnimation(new Vector2(1, 1), new Animation(deadTexture, 13, 8, 0.1f, 4)); // SD
+            _deathAnim.AddAnimation(new Vector2(1, -1), new Animation(deadTexture, 13, 8, 0.1f, 2)); // WD
         }
 
         public void SetBounds(Point mapSize, Point tileSize)
@@ -85,7 +99,7 @@ namespace SteeringAssignment_real.Models
             Vector2 pushDirection = Vector2.Zero;
             object animationKey = AnimationManager.GetAnimationKey(InputManager.Direction);
             float distance = 0;
-            Vector2 direction = Vector2.Zero;
+            direction = Vector2.Zero;
             float enemyHealth = 0;
 
             // Check if the spacebar is pressed and the player is in the walking state
@@ -112,7 +126,8 @@ namespace SteeringAssignment_real.Models
 
                     if (InputManager.Moving)
                     {
-                        Position += Vector2.Normalize(InputManager.Direction) * speed * Globals.Time;
+                        playerDirection = Vector2.Normalize(InputManager.Direction);
+                        Position += playerDirection * speed * Globals.Time;
                         lastKey = AnimationManager.GetAnimationKey(InputManager.LastDirection);
                     }
                     else if (InputManager.SpacebarPressed && attackDelayTimer <= 0)
@@ -166,7 +181,17 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case PlayerState.Dead:
-                break;
+                    Position = Vector2.Clamp(Position, _minPos, _maxPos);
+
+                    if (_deathAnim.CurrentFrame == _deathAnim.TotalFrames - 1)
+                    {
+                        _deathAnim.UpdateDeath(Vector2.Zero);
+                    }
+                    else
+                    {
+                        _deathAnim.Update(lastKey);
+                    }
+                    break;
             }
 
             if (pushDirection != Vector2.Zero && enemyHealth > 0)
@@ -190,6 +215,8 @@ namespace SteeringAssignment_real.Models
             return -1;
         }
 
+        public PlayerState GetPlayerState() { return currentState; }
+
         public override void Draw()
         {
             switch (currentState)
@@ -207,11 +234,7 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case PlayerState.Dead:
-                    _fistAttackAnim.Draw(Position - origin, Color);
-                    string message = "YOU ARE DEAD!";
-                    Vector2 messageSize = Globals.Font.MeasureString(message);
-                    Vector2 messagePosition = new((Position.X - messageSize.X / 2), (Position.Y - messageSize.Y * 2));
-                    Globals.SpriteBatch.DrawString(Globals.Font, message, messagePosition, Color.Red);
+                    _deathAnim.Draw(Position - origin, Color);
                     break;
             }
            

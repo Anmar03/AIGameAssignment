@@ -10,7 +10,7 @@ namespace SteeringAssignment_real.Mangers
     {
         private readonly Map _map;
         private readonly CollisionManager _collisionManager;
-        public readonly GridMap _gridMap;
+        private readonly GridMap _gridMap;
         private readonly Lighting _lighting;
         public readonly Player _player;
         private readonly Torch _torch;
@@ -18,10 +18,11 @@ namespace SteeringAssignment_real.Mangers
         private readonly UIManager _uiManager;
         public List<Obstacle> _obstacles;
         public List<Sprite> _entities;
-        Texture2D pixelTexture;
+        private Texture2D pixelTexture;
         private Matrix _translation;
-        public Vector2 Center = new(Globals.WindowSize.X / 2, Globals.WindowSize.Y / 2);
-        Random random;
+        private Vector2 Center = new(Globals.WindowSize.X / 2, Globals.WindowSize.Y / 2);
+        private Random random;
+        
 
         public GameManager()
         {
@@ -65,6 +66,12 @@ namespace SteeringAssignment_real.Mangers
         {
             InputManager.Update();
             _player.Update(_collisionManager);
+
+            if (_player.GetPlayerState() == PlayerState.Dead)
+            {
+                _lighting.AddLight(new Light(Center, Center.Y, 0.8f, 1));
+            }
+
             _torch.LifeSpan -= Globals.Time;
             _torch.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
 
@@ -109,6 +116,7 @@ namespace SteeringAssignment_real.Mangers
 
             _player.Color = _lighting.CalculateLighting(_player.Position);
             _player.Draw();
+            DrawLine(_player.Position, _player.Position + _player.playerDirection * 50, Color.Red);
             //DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position)));
             //_player.DrawPositionDebug();
 
@@ -192,9 +200,6 @@ namespace SteeringAssignment_real.Mangers
 
         public void DrawPositionDebug(Vector2 Position)
         {
-            pixelTexture = new Texture2D(Globals.GraphicsDevice, 1, 1);
-            pixelTexture.SetData(new Color[] { Color.White });
-
             float radius = 5f;
 
             Color debugColor = Color.Blue;
@@ -233,6 +238,8 @@ namespace SteeringAssignment_real.Mangers
         {
             Vector2 edge = end - start;
             float angle = (float)Math.Atan2(edge.Y, edge.X);
+            pixelTexture = new Texture2D(Globals.GraphicsDevice, 1, 1);
+            pixelTexture.SetData(new Color[] { Color.White });
 
             Globals.SpriteBatch.Draw(pixelTexture,
                              new Rectangle((int)start.X, (int)start.Y, (int)edge.Length(), thickness),
@@ -243,6 +250,11 @@ namespace SteeringAssignment_real.Mangers
                              SpriteEffects.None,
                              0);
 
+        }
+
+        public GridMap GetGridMap()
+        {
+            return _gridMap;
         }
 
     }
