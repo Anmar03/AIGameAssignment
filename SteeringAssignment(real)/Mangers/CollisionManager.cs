@@ -67,7 +67,7 @@ namespace SteeringAssignment_real.Mangers
             {
                 foreach (var entityB in gameManager._entities)
                 {
-                    if (entityA != entityB)
+                    if (entityA != entityB && entityA.EntityCollision && entityB.EntityCollision)
                     {
                         // Calculate distances and minimum distances
                         float distanceX = Math.Abs(entityA.Position.X - entityB.Position.X);
@@ -152,7 +152,7 @@ namespace SteeringAssignment_real.Mangers
         {
             var closestEntity = gameManager._entities
                 .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
-                .Where(entity => entity.Position != position)
+                .Where(entity => entity.Position != position && entity.EntityCollision)
                 .FirstOrDefault();
 
             if (closestEntity != null)
@@ -165,7 +165,7 @@ namespace SteeringAssignment_real.Mangers
         {
             var closestEntity = gameManager._entities
                 .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
-                .Where(entity => entity.Position != position)
+                .Where(entity => entity.Position != position && entity.EntityCollision)
                 .FirstOrDefault();
 
             if (closestEntity != null)

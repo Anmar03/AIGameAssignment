@@ -7,29 +7,44 @@ namespace SteeringAssignment_real.Mangers
     public class UIManager
     {
         private Texture2D healthTextureFull;
-        private Texture2D healthTextureHalf;
-        private Texture2D healthTextureEmpty;
-        private Vector2 healthPos;
+        private static Vector2 healthPos;
         private Vector2 healthOrigin;
         private Player _player;
         private Matrix _uiTransform;
+        private static string debugPrompt;
+        private static Vector2 debugPromptPos;
+        private static int margin = 50;
+        private static string deathMessage;
+        private static Vector2 deathMessageSize;
+        private static Vector2 deathMessagePosition;
         public Color Color { get; set; }
 
         public UIManager(Player _player) 
         {
             this._player = _player;
 
-            healthTextureFull = Globals.Content.Load<Texture2D>("heart-full");
-            //healthTextureHalf = Globals.Content.Load<Texture2D>("heart-half");
-            //healthTextureEmpty = Globals.Content.Load<Texture2D>("heart-empty");
+            InitPrompts();
 
+            healthTextureFull = Globals.Content.Load<Texture2D>("heart-full");
             healthOrigin = new(healthTextureFull.Width / 2, healthTextureFull.Height / 2);
             UpdateUITransform();
+        }
+
+        private void InitPrompts()
+        {
+            debugPrompt = "Press \'T\' Key to enter DebugMode";
+            debugPromptPos = new(margin, margin/2);
+
+            deathMessage = "YOU ARE DEAD!";
+            deathMessageSize = Globals.Font.MeasureString(deathMessage);
+            deathMessagePosition = new((Globals.WindowSize.X / 2 - deathMessageSize.X / 2), (Globals.WindowSize.Y / 2 - deathMessageSize.Y * 2));
         }
 
         public void Draw()
         {
             Globals.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, transformMatrix: _uiTransform);
+
+            Globals.SpriteBatch.DrawString(Globals.Font, debugPrompt, debugPromptPos, Color.White);
 
             healthPos = new Vector2(Globals.WindowSize.X * 0.8f, Globals.WindowSize.Y * 0.95f);
 
@@ -41,10 +56,7 @@ namespace SteeringAssignment_real.Mangers
 
             if (_player.GetPlayerState() == PlayerState.Dead)
             {
-                string message = "YOU ARE DEAD!";
-                Vector2 messageSize = Globals.Font.MeasureString(message);
-                Vector2 messagePosition = new((Globals.WindowSize.X/2 - messageSize.X / 2), (Globals.WindowSize.Y/2 - messageSize.Y * 2));
-                Globals.SpriteBatch.DrawString(Globals.Font, message, messagePosition, Color.Red);
+                Globals.SpriteBatch.DrawString(Globals.Font, deathMessage, deathMessagePosition, Color.Red);
             }
 
             Globals.SpriteBatch.End();

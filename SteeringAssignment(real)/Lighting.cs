@@ -24,6 +24,7 @@ namespace SteeringAssignment_real
             float totalIntensity = 0f;
             float maxIntensity = 0f;
             float intensity = 0f;
+            Color lightColor = Color.White;
 
             foreach (var light in _lights)
             {
@@ -33,12 +34,16 @@ namespace SteeringAssignment_real
                     intensity = light.Intensity * (1f - distance / light.Radius);
                     totalIntensity += intensity;
                     maxIntensity = MathHelper.Max(maxIntensity, light.Intensity);
+                    if (light.Intensity != 0f)
+                    {
+                        lightColor = light.Color;
+                    }
+
                 }
                 else if(distance > light.Radius / 2)
                 {
                     maxIntensity = MathHelper.Max(maxIntensity, intensity);
                 }
-
             }
 
             // Calculate the brightness based on the total intensity
@@ -46,7 +51,7 @@ namespace SteeringAssignment_real
 
             // Interpolate between black and white based on the maximum intensity
             float t = MathHelper.Clamp(maxIntensity / 1.5f, 0.3f, 1f);
-            Color finalColor = Color.Lerp(Color.Black, Color.White, t);
+            Color finalColor = Color.Lerp(Color.Black, lightColor, t);
 
             // Apply brightness to the final color
             finalColor *= brightness;

@@ -8,7 +8,5 @@ namespace SteeringAssignment_real.Models
         public Obstacle(Texture2D texture, Vector2 position) : base(texture, position)
         {
         }
-
-        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SteeringAssignment_real.Mangers;
+using System.Collections.Generic;
 
 namespace SteeringAssignment_real.Models
 {
@@ -14,7 +15,7 @@ namespace SteeringAssignment_real.Models
     public class Player : Sprite
     {
         private PlayerState currentState = PlayerState.Walk;
-        private const float speed = 400;
+        private const float speed = 300;
         private Vector2 _minPos, _maxPos;
         private readonly Animation frame;
         private readonly AnimationManager _anims = new();
@@ -238,6 +239,11 @@ namespace SteeringAssignment_real.Models
                     break;
             }
            
+        }
+
+        public bool isDead()
+        {
+            return currentState == PlayerState.Dead;
         }
     }
 }

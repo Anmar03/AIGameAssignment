@@ -8,18 +8,11 @@ using SteeringAssignment_real.FuzzyLogic;
 
 namespace SteeringAssignment_real.Models
 {
-    public enum SkeletonState
-    {
-        Wander,
-        Aggro,
-        Attacking,
-        Cooldown,
-        Dead
-    }
     public class Skeleton : Sprite
     {
-        public SkeletonState currentState = SkeletonState.Wander;
+        public State currentState = State.Wander;
         private readonly PathManager pathManager;
+        private readonly StateMachine stateMachine;
         private List<Vector2> shortestPath;
         private const float speed = 150;
         private Vector2 _minPos, _maxPos;
@@ -27,11 +20,12 @@ namespace SteeringAssignment_real.Models
         private readonly AnimationManager _anims = new();
         private readonly AnimationManager _attackAnimation = new();
         private readonly AnimationManager _deadAnimation = new();
+        private readonly GameManager _gameManager;
         private float frameWidth, frameHeight;
         public Vector2 origin;
         readonly Texture2D attackTexture;
         readonly Texture2D deadTexture;
-        Random random = new();
+        private Random random = new();
         private const float pushForce = 600;
         private float attackDelayTimer = 0;
         private const float attackDelayDuration = 0.8f;
@@ -40,11 +34,10 @@ namespace SteeringAssignment_real.Models
         private const float PathUpdateInterval = 0.5f;
         private float pathUpdateTimer = 0.0f;
         private float radiusSquared;
-        private const float aggroRadius = 800;
         private Vector2 wanderTargetDirection = Vector2.Zero;
         private Vector2 turnSpeed;
         private float wanderDuration = 0;
-        private Vector2 skeletonDirection;
+        public Vector2 skeletonDirection;
 
         public void FuzzyLogicInit()
         {
@@ -70,10 +63,12 @@ namespace SteeringAssignment_real.Models
 
         public Skeleton(Texture2D texture, Vector2 position, GameManager gameManager) : base(texture, position)
         {
+            _gameManager = gameManager;
             pathManager = new PathManager(gameManager);
             shortestPath = new List<Vector2>();
             skeletonDirection = gameManager._player.Position - Position; skeletonDirection.Normalize();
             turnSpeed = new(random.Next(-100, 100), random.Next(-100, 100));
+            stateMachine = new(this);
 
             frame = new Animation(texture, 8, 8, 0.1f, 7);
             _anims.AddAnimation(new Vector2(0, 1), frame);
@@ -106,8 +101,9 @@ namespace SteeringAssignment_real.Models
             _deadAnimation.AddAnimation(new Vector2(1, -1), new Animation(deadTexture, 8, 8, 0.1f, 4));
 
             shortestPath = pathManager.AStar(Position, gameManager._player.Position);
-
+            
             Health = 50f;
+            AggroRadius = 600;
             FuzzyLogicInit();
         }
 
@@ -131,16 +127,16 @@ namespace SteeringAssignment_real.Models
             float distance = 0;
             Object animationKey;
 
-            if (Health <= 0 && currentState != SkeletonState.Dead)
+            if (Health <= 0 && currentState != State.Dead)
             {
-                currentState = SkeletonState.Dead;
+                currentState = State.Dead;
                 skeletonDirection = shortestPath[node] - Position; skeletonDirection.Normalize();
             }
             else
             {
                 distance = Vector2.Distance(Position, _player.Position);
 
-                if (currentState != SkeletonState.Wander)
+                if (currentState != State.Wander)
                 {
                     pathUpdateTimer += Globals.Time;
 
@@ -152,7 +148,7 @@ namespace SteeringAssignment_real.Models
                         node = 0;
                     }
 
-                    if (shortestPath.Count == 0)
+                    if (shortestPath.Count == 0) // if shortest path fails
                     {
                         skeletonDirection = _player.Position - Position; skeletonDirection.Normalize();
                     }
@@ -162,7 +158,7 @@ namespace SteeringAssignment_real.Models
 
                         if (Vector2.DistanceSquared(Position, shortestPath[node]) < radiusSquared)
                         {
-                            if (node + 1 < shortestPath.Count)
+                            if (node < shortestPath.Count-1)
                             {
                                 node++;
                             }
@@ -171,10 +167,6 @@ namespace SteeringAssignment_real.Models
                                 skeletonDirection = _player.Position - Position; skeletonDirection.Normalize();
                             }
                         }
-                        else
-                        {
-                            skeletonDirection = shortestPath[node] - Position; skeletonDirection.Normalize();
-                        }
                     }
                 }
             }
@@ -182,10 +174,10 @@ namespace SteeringAssignment_real.Models
 
             switch (currentState)
             {
-                case SkeletonState.Wander: // Causing skeleton to disappear when wandering which makes them invulnerable
-                    if (distance < aggroRadius)
+                case State.Wander: 
+                    if (distance < AggroRadius && !_player.isDead())
                     {
-                        currentState = SkeletonState.Aggro;
+                        currentState = State.Aggro;
                         break;
                     }
                     else
@@ -211,7 +203,7 @@ namespace SteeringAssignment_real.Models
                         if (wanderDuration <= 0)
                         {
                             wanderDuration = (float)random.NextDouble() * 3.0f;
-                            wanderTargetDirection = Vector2.Zero; // Reset wander target direction
+                            wanderTargetDirection = Vector2.Zero; 
                             turnSpeed = new(random.Next(-10, 10), random.Next(-10, 10));
              
                         }
@@ -225,16 +217,23 @@ namespace SteeringAssignment_real.Models
                     break;
 
 
-                case SkeletonState.Aggro:
-                    // If out of aggro radius go back to idling
-                    if (distance > aggroRadius)
+                case State.Aggro:
+                    // If out of aggro radius or Player is dead, go back to idling
+                    if (distance > AggroRadius || _player.isDead())
                     {
-                        currentState = SkeletonState.Wander;
+                        currentState = State.Wander;
+                        break;
                     }
-                    // If close to player, start attacking
-                    if (distance < width / 2)
+
+                    if (attackDelayTimer > 0)
                     {
-                        currentState = SkeletonState.Attacking;
+                        attackDelayTimer -= Globals.Time;
+                    }
+
+                    // If close to player, start attacking
+                    if (distance < width / 2 && attackDelayTimer <= 0)
+                    {
+                        currentState = State.Attacking;
                         _attackAnimation.Reset(); // Reset attack animation to start from the beginning
                     }
                     else
@@ -246,7 +245,7 @@ namespace SteeringAssignment_real.Models
                     }
                     break;
 
-                case SkeletonState.Attacking:
+                case State.Attacking:
                     _attackAnimation.Update(animationKey);
 
                     // if in the middle of animation and still close, push the player line 168
@@ -257,35 +256,15 @@ namespace SteeringAssignment_real.Models
                     else if (_attackAnimation.CurrentFrame == _attackAnimation.TotalFrames - 1)
                     {
                         // Attack animation finished. start cooldown
-                        currentState = SkeletonState.Cooldown;
+                        currentState = State.Aggro;
                         attackDelayTimer = attackDelayDuration;
                     }
                     break;
 
-                case SkeletonState.Cooldown:
-                    // cooldown after attack
-                    if (attackDelayTimer > 0)
-                    {
-                        if (distance > width / 2)
-                        {
-                            // Move towards the target
-                            _anims.Update(animationKey);
-                            Position += skeletonDirection * speed * Globals.Time;
-                            Position = Vector2.Clamp(Position, _minPos, _maxPos);
-                        }
-
-                        attackDelayTimer -= Globals.Time;
-                        if (attackDelayTimer <= 0)
-                        {
-                            attackDelayTimer = 0; 
-                            currentState = SkeletonState.Aggro; // Return to aggressive state after cooldown
-                        }
-                    }
-                    break;
-
-                case SkeletonState.Dead:
+                case State.Dead:
                     
                     Position = Vector2.Clamp(Position, _minPos, _maxPos);
+                    EntityCollision = false;
 
                     if (_deadAnimation.CurrentFrame == _deadAnimation.TotalFrames - 1) 
                     {
@@ -309,27 +288,26 @@ namespace SteeringAssignment_real.Models
         {
             switch (currentState)
             {
-                case SkeletonState.Wander:
+                case State.Wander:
                     _anims.Draw(Position - origin, Color);
                     break;
 
-                case SkeletonState.Attacking:
+                case State.Attacking:
                     _attackAnimation.Draw(Position - origin, Color);
                     break;
 
-                case SkeletonState.Aggro:
+                case State.Aggro:
                     _anims.Draw(Position - origin, Color);
-                    //foreach (var node in shortestPath)
-                    //{
-                    //    DrawPositionDebug(node);
-                    //}
+                    if (InputManager.DebugMode)
+                    {
+                        foreach (var node in shortestPath)
+                        {
+                            _gameManager.DrawPositionDebug(node);
+                        }
+                    }
                     break;
 
-                case SkeletonState.Cooldown:
-                    _anims.Draw(Position - origin, Color);
-                    break;
-
-                case SkeletonState.Dead:
+                case State.Dead:
                     _deadAnimation.Draw(Position - origin, Color);
                     break;
             }

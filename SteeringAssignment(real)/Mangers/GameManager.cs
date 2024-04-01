@@ -14,6 +14,7 @@ namespace SteeringAssignment_real.Mangers
         private readonly Lighting _lighting;
         public readonly Player _player;
         private readonly Torch _torch;
+        private List<GlowStick> _glowSticks;
         private readonly List<Skeleton> _skeletons;
         private readonly UIManager _uiManager;
         public List<Obstacle> _obstacles;
@@ -22,11 +23,16 @@ namespace SteeringAssignment_real.Mangers
         private Matrix _translation;
         private Vector2 Center = new(Globals.WindowSize.X / 2, Globals.WindowSize.Y / 2);
         private Random random;
-        
+        private const int VectorLength = 50;
+        private bool DebugMode = false;
+        private int glowStickAmmo;
+        private bool glowstickCooldown = false;
+        private float glowstickCooldownDuration = 1.0f; // Adjust as needed, in seconds
+        private float glowstickCooldownTimer = 0.0f;
 
         public GameManager()
         {
-            _map = new Map();
+            _map = new();
             _collisionManager = new CollisionManager(this);
             random = new();
 
@@ -34,13 +40,13 @@ namespace SteeringAssignment_real.Mangers
             _obstacles = new List<Obstacle>();
             GenerateObstacles(8);
 
-            _gridMap = new GridMap(this, _map);
+            _gridMap = new(this, _map);
 
             _player = new Player(Globals.Content.Load<Texture2D>("walknew"), Center);
             _player.SetBounds(_map.MapSize, _map.TileSize);
             _entities = new List<Sprite>{_player};
 
-            _skeletons = new List<Skeleton>();
+            _skeletons = new();
             GenerateSkeletons(4);
 
             _lighting = new Lighting();
@@ -48,9 +54,12 @@ namespace SteeringAssignment_real.Mangers
             _torch = new Torch((_player.Position + _player.origin + _player.origin / 2));
             _lighting.AddLight(_torch);
 
-            _uiManager = new UIManager(_player);
+            _glowSticks = new();
+            GenerateGlowSticks(3);
+            glowStickAmmo = _glowSticks.Count-1;
 
             Globals.Font = Globals.Content.Load<SpriteFont>("Font");
+            _uiManager = new UIManager(_player);
         }
 
         private void CalculateTranslation()
@@ -65,17 +74,53 @@ namespace SteeringAssignment_real.Mangers
         public void Update()
         {
             InputManager.Update();
+            DebugMode = InputManager.DebugMode;
+
             _player.Update(_collisionManager);
 
-            if (_player.GetPlayerState() == PlayerState.Dead)
+            if (_player.isDead())
             {
-                _lighting.AddLight(new Light(Center, Center.Y, 0.8f, 1));
+                _lighting.AddLight(new Light(Center, Center.X*2, 0.8f, 1));
             }
 
             _torch.LifeSpan -= Globals.Time;
-            _torch.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
+            _torch.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works
 
-            if (_torch.LifeSpan <= 0f ) 
+            if (glowstickCooldown)
+            {
+                glowstickCooldownTimer -= Globals.Time;
+                if (glowstickCooldownTimer <= 0)
+                {
+                    glowstickCooldown = false;
+                }
+            }
+
+            if (glowStickAmmo >= 0 && !glowstickCooldown)
+            {
+                if (InputManager.G_keyPressed && _glowSticks[glowStickAmmo].throwable)
+                {
+                    _glowSticks[glowStickAmmo].Throw(InputManager.LastDirection);
+                    glowStickAmmo--;
+                    glowstickCooldown = true;
+                    glowstickCooldownTimer = glowstickCooldownDuration;
+                }
+
+                if (InputManager.E_keyPressed && _glowSticks[glowStickAmmo].throwable)
+                {
+                    _glowSticks[glowStickAmmo].Active = true;
+                }
+            }
+
+            foreach (var glowStick in _glowSticks)
+            {
+                if (glowStick.throwable)
+                {
+                    glowStick.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
+                }
+                glowStick.Update();
+            }
+
+            if (_torch.LifeSpan <= 0f)
             {
                 _torch.Intensity = 0f;
             }
@@ -91,11 +136,6 @@ namespace SteeringAssignment_real.Mangers
             foreach (var skeleton in _skeletons)
             {
                 skeleton.Update(_player);
-
-                //if (skeleton.currentState == SkeletonState.Dead)
-                //{
-
-                //}
             }
 
             CalculateTranslation();
@@ -116,21 +156,61 @@ namespace SteeringAssignment_real.Mangers
 
             _player.Color = _lighting.CalculateLighting(_player.Position);
             _player.Draw();
-            DrawLine(_player.Position, _player.Position + _player.playerDirection * 50, Color.Red);
-            //DrawPositionDebug(_gridMap.GetGridPointPosition(_gridMap.GetNearestGridPoint(_player.Position)));
-            //_player.DrawPositionDebug();
+            if (!_player.isDead() && DebugMode)
+            {
+                DrawLine(_player.Position, _player.Position + _player.playerDirection * VectorLength, Color.Red);
+            } 
 
             foreach (var skeleton in _skeletons)
             {
                 skeleton.Color = _lighting.CalculateLighting(skeleton.Position);
                 skeleton.Draw();
+                if (skeleton.currentState != State.Dead && DebugMode)
+                {
+                    DrawLine(skeleton.Position, skeleton.Position + Vector2.Normalize(skeleton.skeletonDirection) * VectorLength, Color.Red);
+                }
+            }
+
+            foreach (var glowStick in _glowSticks)
+            {
+                glowStick.Draw();
             }
 
             Globals.SpriteBatch.End();
 
-            _uiManager.Color = _lighting.CalculateLighting(_player.Position);
             _uiManager.Draw();
             
+        }
+
+        private void GenerateGlowSticks(int count)
+        {
+            Color red = new(200, 50, 50);
+            Color green = new(50, 200, 50);
+            Color blue = new(50, 50, 200);
+            GlowStick glowStick;
+            int randomPicker;
+
+            for (int i = 0; i < count; i++)
+            {
+                randomPicker = random.Next(0, 3);
+
+                if (randomPicker == 0)
+                {
+                    glowStick = new((_player.Position), red);
+                }
+                else if (randomPicker == 1)
+                {
+                    glowStick = new((_player.Position), green);
+                }
+                else
+                {
+                    glowStick = new((_player.Position), blue);
+                }
+                glowStick.SetBounds(_map.MapSize, _map.TileSize);
+                _glowSticks.Add(glowStick);
+                //_entities.Add(glowStick.GetEntity()); // causes problems like not allowing player to attack enemys
+                _lighting.AddLight(glowStick);
+            }
         }
 
         private void GenerateSkeletons(int count)
@@ -149,10 +229,11 @@ namespace SteeringAssignment_real.Mangers
             int padding = 100;
             Texture2D texture;
             Vector2 randomPosition;
+            int randomPicker;
 
             for (int i = 0; i < count; i++)
             {
-                int randomPicker = random.Next(0, 3);
+                randomPicker = random.Next(0, 3);
                 if (randomPicker == 0)
                 {
                     texture = Globals.Content.Load<Texture2D>("Rocks");
@@ -175,7 +256,6 @@ namespace SteeringAssignment_real.Mangers
                 _obstacles.Add(obstacle);
             }
         }
-
 
         // Method to get all obstacles within a radius of a position
         public bool ObstacleProximity(Vector2 position, float radius)
@@ -257,5 +337,9 @@ namespace SteeringAssignment_real.Mangers
             return _gridMap;
         }
 
+        public void AddLight(Light light)
+        {
+            _lighting.AddLight(light);
+        }
     }
 }
