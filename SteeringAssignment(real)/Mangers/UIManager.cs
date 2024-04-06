@@ -33,18 +33,18 @@ namespace SteeringAssignment_real.Mangers
         private void InitPrompts()
         {
             debugPrompt = "Press \'T\' Key to enter DebugMode";
-            debugPromptPos = new(margin, margin/2);
+            debugPromptPos = new(margin/2, margin/2);
 
-            deathMessage = "YOU ARE DEAD!";
+            deathMessage = "GAME OVER!";
             deathMessageSize = Globals.Font.MeasureString(deathMessage);
-            deathMessagePosition = new((Globals.WindowSize.X / 2 - deathMessageSize.X / 2), (Globals.WindowSize.Y / 2 - deathMessageSize.Y * 2));
+            deathMessagePosition = new((Globals.WindowSize.X / 2 - deathMessageSize.X), (Globals.WindowSize.Y / 2 - deathMessageSize.Y * 2));
         }
 
         public void Draw()
         {
             Globals.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, transformMatrix: _uiTransform);
 
-            Globals.SpriteBatch.DrawString(Globals.Font, debugPrompt, debugPromptPos, Color.White);
+            Globals.SpriteBatch.DrawString(Globals.Font, debugPrompt, debugPromptPos, Color.White, 0f, Vector2.Zero, 0.7f, SpriteEffects.None, 0f);
 
             healthPos = new Vector2(Globals.WindowSize.X * 0.8f, Globals.WindowSize.Y * 0.95f);
 
@@ -54,9 +54,9 @@ namespace SteeringAssignment_real.Mangers
                 healthPos.X += healthTextureFull.Width;
             }
 
-            if (_player.GetPlayerState() == PlayerState.Dead)
+            if (_player.isDead())
             {
-                Globals.SpriteBatch.DrawString(Globals.Font, deathMessage, deathMessagePosition, Color.Red);
+                Globals.SpriteBatch.DrawString(Globals.Font, deathMessage, deathMessagePosition, Color.Red, 0f, Vector2.Zero, 2.0f, SpriteEffects.None, 0f);
             }
 
             Globals.SpriteBatch.End();

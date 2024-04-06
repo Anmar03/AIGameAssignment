@@ -69,8 +69,42 @@ namespace SteeringAssignment_real.Mangers
             }
             else
             {
-                // If direction components are NaN, return zero vector
+                // If direction is NaN
                 return Vector2.Zero;
+            }
+        }
+
+        public static Vector2 Get16AnimationKey(Vector2 direction)
+        {
+            if (!float.IsNaN(direction.X) && !float.IsNaN(direction.Y))
+            {
+                // Round direction vector components to closest 0.5, 0, -0.5, -1, or 1
+                float x = RoundToNearest(direction.X);
+                float y = RoundToNearest(direction.Y);
+
+                return new Vector2(x, y);
+            }
+            else
+            {  
+                return Vector2.Zero;
+            }
+        }
+
+        private static float RoundToNearest(float value)
+        {
+            float roundedValue = (float)Math.Round(value * 2, MidpointRounding.AwayFromZero) / 2;
+            float diffToHalf = (float)Math.Abs(roundedValue - Math.Round(roundedValue));
+            if (diffToHalf < 0.25)
+            {
+                return (float)Math.Round(roundedValue);
+            }
+            else if (diffToHalf > 0.75)
+            {
+                return (float)Math.Round(Math.Sign(value) * Math.Ceiling(Math.Abs(value)));
+            }
+            else
+            {
+                return roundedValue;
             }
         }
 

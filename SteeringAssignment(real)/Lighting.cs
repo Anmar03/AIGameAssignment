@@ -1,6 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
-using System;
+﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 namespace SteeringAssignment_real
@@ -40,20 +38,19 @@ namespace SteeringAssignment_real
                     }
 
                 }
-                else if(distance > light.Radius / 2)
+                else if (distance > light.Radius / 2)
                 {
                     maxIntensity = MathHelper.Max(maxIntensity, intensity);
                 }
             }
 
-            // Calculate the brightness based on the total intensity
+            // Calculate brightness based on the total intensity
             float brightness = MathHelper.Clamp(totalIntensity, 0.2f, 1f);
 
             // Interpolate between black and white based on the maximum intensity
             float t = MathHelper.Clamp(maxIntensity / 1.5f, 0.3f, 1f);
             Color finalColor = Color.Lerp(Color.Black, lightColor, t);
 
-            // Apply brightness to the final color
             finalColor *= brightness;
 
             return finalColor;

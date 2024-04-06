@@ -144,9 +144,11 @@ namespace SteeringAssignment_real.Mangers
 
         public void Draw()
         {
+            Globals.GraphicsDevice.Clear(Color.Black);
             Globals.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, transformMatrix: _translation);
+
             _map.Draw(_lighting);
-            _gridMap.Draw();
+            
 
             foreach (var rock in _obstacles)
             {
@@ -158,6 +160,7 @@ namespace SteeringAssignment_real.Mangers
             _player.Draw();
             if (!_player.isDead() && DebugMode)
             {
+                _gridMap.Draw();
                 DrawLine(_player.Position, _player.Position + _player.playerDirection * VectorLength, Color.Red);
             } 
 
@@ -165,7 +168,7 @@ namespace SteeringAssignment_real.Mangers
             {
                 skeleton.Color = _lighting.CalculateLighting(skeleton.Position);
                 skeleton.Draw();
-                if (skeleton.currentState != State.Dead && DebugMode)
+                if (skeleton.IsDead() && DebugMode)
                 {
                     DrawLine(skeleton.Position, skeleton.Position + Vector2.Normalize(skeleton.skeletonDirection) * VectorLength, Color.Red);
                 }
@@ -184,9 +187,9 @@ namespace SteeringAssignment_real.Mangers
 
         private void GenerateGlowSticks(int count)
         {
-            Color red = new(200, 50, 50);
-            Color green = new(50, 200, 50);
-            Color blue = new(50, 50, 200);
+            Color red = new(200, 100, 100);
+            Color green = new(100, 200, 100);
+            Color blue = new(100, 100, 200);
             GlowStick glowStick;
             int randomPicker;
 
@@ -330,6 +333,11 @@ namespace SteeringAssignment_real.Mangers
                              SpriteEffects.None,
                              0);
 
+        }
+
+        public Point GetMapSize()
+        {
+            return _map.MapSize;
         }
 
         public GridMap GetGridMap()

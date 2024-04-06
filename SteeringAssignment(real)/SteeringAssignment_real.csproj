@@ -20,6 +20,10 @@
     <Compile Remove="Models\Triangle.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Content\File.fx" />
+    <None Remove="LightEffect.glsl" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
   </ItemGroup>

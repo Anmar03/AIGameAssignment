@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SteeringAssignment_real.Models;
 using System;
 using System.Collections.Generic;
+using SteeringAssignment_real.Models;
 
 namespace SteeringAssignment_real
 {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SteeringAssignment_real.Mangers;
-using System.Collections.Generic;
 
 namespace SteeringAssignment_real.Models
 {
@@ -15,7 +14,6 @@ namespace SteeringAssignment_real.Models
     public class Player : Sprite
     {
         private PlayerState currentState = PlayerState.Walk;
-        private const float speed = 300;
         private Vector2 _minPos, _maxPos;
         private readonly Animation frame;
         private readonly AnimationManager _anims = new();
@@ -26,11 +24,10 @@ namespace SteeringAssignment_real.Models
         private readonly Texture2D swordAttackTexture;
         private readonly Texture2D deadTexture;
 
-        private float frameWidth, frameHeight;
         public Vector2 origin;
         private Vector2 direction;
         public Vector2 playerDirection {  get; private set; }
-        private const float punchPushForce = 700;
+        private const float punchPushForce = 800;
         private const float swordPushForce = 500;
         private const float fistAttackDamage = 2.0f;
         private const float swordAttackDamage = 5.0f;
@@ -41,6 +38,7 @@ namespace SteeringAssignment_real.Models
         public Player(Texture2D texture, Vector2 position) : base(texture, position)
         {
             Health = 50f;
+            speed = 300f;
 
             frame = new Animation(texture, 10, 8, 0.1f, 5);
             _anims.AddAnimation(new Vector2(0, 1), frame); // S
@@ -85,14 +83,12 @@ namespace SteeringAssignment_real.Models
 
         public void SetBounds(Point mapSize, Point tileSize)
         {
-            frameWidth = frame.frameWidth;
-            frameHeight = frame.frameHeight;
-            width = frameWidth;
-            height = frameHeight;
-            origin = new Vector2(frameWidth / 2, frameHeight / 2);
+            width = frame.frameWidth;
+            height = frame.frameHeight;
+            origin = new Vector2(width / 2, height / 2);
 
-            _minPos = new(-tileSize.X / 2 + frameWidth / 3, -tileSize.Y / 2 + frameHeight / 2);
-            _maxPos = new(mapSize.X - tileSize.X / 2 - frameWidth / 3, mapSize.Y - tileSize.X / 2 - frameHeight / 2);
+            _minPos = new(-tileSize.X / 2 + width / 3, -tileSize.Y / 2 + height / 2);
+            _maxPos = new(mapSize.X - tileSize.X / 2 - width / 3, mapSize.Y - tileSize.X / 2 - height / 2);
         }
 
         public void Update(CollisionManager collisionManager)
@@ -167,7 +163,7 @@ namespace SteeringAssignment_real.Models
                     _swordAttackAnim.Update(lastKey);
                     Position = Vector2.Clamp(Position, _minPos, _maxPos);
 
-                    if (_swordAttackAnim.CurrentFrame == 4 && distance < width * 2)
+                    if (_swordAttackAnim.CurrentFrame == 4 && distance < width * 1.5f)
                     {
                         pushDirection = direction * swordPushForce;
                     }
@@ -182,7 +178,7 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case PlayerState.Dead:
-                    Position = Vector2.Clamp(Position, _minPos, _maxPos);
+                    EntityCollision = false;
 
                     if (_deathAnim.CurrentFrame == _deathAnim.TotalFrames - 1)
                     {

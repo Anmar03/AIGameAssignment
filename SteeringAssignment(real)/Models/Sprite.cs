@@ -10,9 +10,10 @@ namespace SteeringAssignment_real.Models
         public Vector2 Origin { get; set; }
         public Color Color { get; set; }
         public bool EntityCollision = true;
+        public bool walking = false;
 
         public float width, height;
-        public float Health;
+        public float Health, speed;
         public float AggroRadius;
 
         public Sprite(Texture2D texture, Vector2 position)
@@ -27,7 +28,7 @@ namespace SteeringAssignment_real.Models
 
         public virtual void Draw()
         {
-            Globals.SpriteBatch.Draw(_texture, Position, null, Color, 0f, Origin, 1f, SpriteEffects.None, 0f);
+            Globals.SpriteBatch.Draw(_texture, Position, null, Color, 0f, Origin, 1f, SpriteEffects.None, 0.2f);
         }
     }
 }

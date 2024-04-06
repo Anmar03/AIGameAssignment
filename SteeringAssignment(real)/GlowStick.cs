@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SteeringAssignment_real.Mangers;
 using SteeringAssignment_real.Models;
 
 namespace SteeringAssignment_real
@@ -9,7 +8,7 @@ namespace SteeringAssignment_real
     {
         private const float defaultRadius = 400;
         private const float defaultIntensity = 0.9f;
-        private const float defaultLifeSpan = 60;
+        private const float defaultLifeSpan = 90;
         private Vector2 _minPos, _maxPos;
         private Texture2D glowStickTexture;
         private Sprite glowSprite;
@@ -60,20 +59,20 @@ namespace SteeringAssignment_real
                 // distance from current position to position it was thrown from
                 float distanceToThrownFrom = Vector2.Distance(Position, throwStartPosition);
 
-                // If the GlowStick is within a certain radius from the throw start position
+                // If GlowStick is within a certain radius from the throw start position
                 if (distanceToThrownFrom > throwStopRadius)
                 {
                     // Gradually reduce velocity until it comes to a stop
-                    velocity *= 0.9f; // You can adjust the damping factor as needed
+                    velocity *= 0.9f;
                 }
-                
+
                 // Update position based on velocity only when thrown
                 Position += velocity * Globals.Time;
 
                 // if glowstick velocity is very low
                 if (velocity.LengthSquared() < 400f)
                 {
-                    thrown = false; // Stop throwing
+                    thrown = false;
                 }
             }
             Position = Vector2.Clamp(Position, _minPos, _maxPos);
@@ -81,7 +80,7 @@ namespace SteeringAssignment_real
             glowSprite.Position = Vector2.Clamp(glowSprite.Position, _minPos, _maxPos);
         }
         public void Draw()
-        { 
+        {
             glowSprite.Draw();
         }
 
@@ -107,7 +106,7 @@ namespace SteeringAssignment_real
 
         public void SetBounds(Point mapSize, Point tileSize)
         {
-            _minPos = new(-tileSize.X / 2 + glowSprite.width/2, -tileSize.Y / 2 + glowSprite.height / 2);
+            _minPos = new(-tileSize.X / 2 + glowSprite.width / 2, -tileSize.Y / 2 + glowSprite.height / 2);
             _maxPos = new(mapSize.X - tileSize.X / 2 - glowSprite.width / 2, mapSize.Y - tileSize.X / 2 - glowSprite.height / 2);
         }
     }
