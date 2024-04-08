@@ -2,7 +2,7 @@
 using SteeringAssignment_real.Mangers;
 using SteeringAssignment_real.Models;
 
-namespace SteeringAssignment_real.StateMachineF
+namespace SteeringAssignment_real.StateMachine
 {
     public class Aggro : State
     {

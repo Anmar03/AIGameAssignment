@@ -14,6 +14,7 @@ namespace SteeringAssignment_real.Mangers
         public static bool DebugMode = false;
         public static bool G_keyPressed;
         public static bool E_keyPressed;
+        public static bool ShowControls = false;
 
         public static void Update()
         {
@@ -49,6 +50,8 @@ namespace SteeringAssignment_real.Mangers
             if (keyboardState.IsKeyDown(Keys.G)) { G_keyPressed = true; } // Throw Glowstick
 
             if (keyboardState.IsKeyDown(Keys.E)) { E_keyPressed = true; } // activate GlowStick
+
+            if (keyboardState.IsKeyDown(Keys.C)) { ShowControls = !ShowControls; } // Shows Controls
 
             if (_direction != Vector2.Zero)
             {

@@ -5,7 +5,7 @@ using SteeringAssignment_real.FuzzyLogic;
 using SteeringAssignment_real.Mangers;
 using SteeringAssignment_real.Models;
 
-namespace SteeringAssignment_real.StateMachineF
+namespace SteeringAssignment_real.StateMachine
 {
     public class CloseAttack : State
     {
@@ -40,7 +40,7 @@ namespace SteeringAssignment_real.StateMachineF
 
             fm.AddRule(new FzAND(Target_Far, Health_Low), new FzVery(Undesirable));
             fm.AddRule(new FzAND(Target_Medium, Health_Low), Desirable);
-            fm.AddRule(new FzAND(Target_Close, Health_Low), VeryDesirable);
+            fm.AddRule(new FzAND(Target_Close, Health_Low), new FzVery(VeryDesirable));
 
             fm.AddRule(new FzAND(Target_Far, Health_Half), Undesirable);
             fm.AddRule(new FzAND(Target_Medium, Health_Half), VeryDesirable);

@@ -152,7 +152,7 @@
 /processorParam:TextureFormat=Color
 /build:glowstick.png
 
-#begin heart-empty.png
+#begin greenGlowStick.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -162,7 +162,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:heart-empty.png
+/build:greenGlowStick.png
 
 #begin heart-full.png
 /importer:TextureImporter
@@ -175,18 +175,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:heart-full.png
-
-#begin heart-half.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:heart-half.png
 
 #begin playerEight.png
 /importer:TextureImporter

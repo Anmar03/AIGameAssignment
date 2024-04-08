@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SteeringAssignment_real.StateMachine;
 using System;
 using System.Linq;
 
@@ -18,7 +19,6 @@ namespace SteeringAssignment_real.Mangers
             {
                 foreach (var entity in gameManager._entities)
                 {
-                    // Distance between the center of the obstacle and the center of the entity
                     float distanceX = Math.Abs(obstacle.Position.X - entity.Position.X);
                     float distanceY = Math.Abs(obstacle.Position.Y - entity.Position.Y);
 
@@ -69,7 +69,7 @@ namespace SteeringAssignment_real.Mangers
                 {
                     if (entityA != entityB && entityA.EntityCollision && entityB.EntityCollision)
                     {
-                        // Calculate distances and minimum distances
+                        // Distances and minimum distances
                         float distanceX = Math.Abs(entityA.Position.X - entityB.Position.X);
                         float distanceY = Math.Abs(entityA.Position.Y - entityB.Position.Y);
                         float minDistanceX = entityA.width / 4 + entityB.width / 4;
@@ -108,7 +108,7 @@ namespace SteeringAssignment_real.Mangers
                                     entityA.Position.Y += overlapY / 2;
                                     entityB.Position.Y -= overlapY / 2;
                                 }
-                            }// e nd else
+                            }// end else
 
                         } // end inner if
 
@@ -120,9 +120,25 @@ namespace SteeringAssignment_real.Mangers
 
         }// end function
 
+        public State GetClosestEntityState(Vector2 position)
+        {
+            // Find closest entity to given position
+            var closestEntity = gameManager._entities
+                .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
+                .Where(entity => entity.Position != position)
+                .FirstOrDefault();
+
+            if (closestEntity != null)
+            {
+                return closestEntity.GetCurrentState();
+            }
+
+            return null;
+        }
+
         public (float distance, Vector2 direction, float health, Vector2 enemyPosition) ClosestEntityInfo(Vector2 position)
         {
-            // Find the closest entity to the given position
+            // Find closest entity to given position
             var closestEntity = gameManager._entities
                 .OrderBy(entity => Vector2.DistanceSquared(entity.Position, position))
                 .Where(entity => entity.Position != position)

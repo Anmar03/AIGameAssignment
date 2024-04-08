@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using SteeringAssignment_real.Models;
 
-namespace SteeringAssignment_real
+namespace SteeringAssignment_real.GameLighting
 {
     public class GlowStick : Light
     {
@@ -19,6 +19,7 @@ namespace SteeringAssignment_real
         private const float defaultThrowSpeed = 1500f;
         private Vector2 throwStartPosition;
         private const float throwStopRadius = 200f;
+
         public GlowStick(Vector2 position, Color color = default) : base(position, defaultRadius, defaultIntensity, defaultLifeSpan, color)
         {
             glowStickTexture = Globals.Content.Load<Texture2D>("glowstick");
@@ -59,14 +60,14 @@ namespace SteeringAssignment_real
                 // distance from current position to position it was thrown from
                 float distanceToThrownFrom = Vector2.Distance(Position, throwStartPosition);
 
-                // If GlowStick is within a certain radius from the throw start position
+                // If GlowStick is within a certain radius from throw start position
                 if (distanceToThrownFrom > throwStopRadius)
                 {
                     // Gradually reduce velocity until it comes to a stop
                     velocity *= 0.9f;
                 }
 
-                // Update position based on velocity only when thrown
+                // Update position based on velocity when thrown
                 Position += velocity * Globals.Time;
 
                 // if glowstick velocity is very low
@@ -76,7 +77,7 @@ namespace SteeringAssignment_real
                 }
             }
             Position = Vector2.Clamp(Position, _minPos, _maxPos);
-            glowSprite.Position = Position - glowSprite.Origin * 4;
+            glowSprite.Position = Position - glowSprite.Origin * 3;
             glowSprite.Position = Vector2.Clamp(glowSprite.Position, _minPos, _maxPos);
         }
         public void Draw()

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SteeringAssignment_real.GameLighting;
 using SteeringAssignment_real.Mangers;
-using SteeringAssignment_real.Models;
 
-namespace SteeringAssignment_real
+namespace SteeringAssignment_real.Models
 {
     public class FireBall : Sprite
     {

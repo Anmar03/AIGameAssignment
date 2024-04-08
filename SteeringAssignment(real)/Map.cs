@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using SteeringAssignment_real.Models;
+using SteeringAssignment_real.GameLighting;
 
 namespace SteeringAssignment_real
 {
@@ -13,6 +14,7 @@ namespace SteeringAssignment_real
         private readonly int noTextures = 5; // Number of tile textures
         public Point TileSize { get; private set; }
         public Point MapSize { get; private set; }
+        Random random;
 
         public Map()
         {
@@ -24,7 +26,7 @@ namespace SteeringAssignment_real
             TileSize = new(textures[0].Width, textures[0].Height);
             MapSize = new(TileSize.X * _mapTileSize.X, TileSize.Y * _mapTileSize.Y);
 
-            Random random = new();
+            random = new();
 
             for (int y = 0; y < _mapTileSize.Y; y++)
             {

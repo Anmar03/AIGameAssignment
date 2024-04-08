@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SteeringAssignment_real.GameLighting;
 using SteeringAssignment_real.Models;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,11 @@ namespace SteeringAssignment_real.Mangers
     {
         private readonly Map _map;
         private readonly CollisionManager _collisionManager;
+        private readonly SpawnManager _spawnManager;
         private readonly GridMap _gridMap;
         private readonly Lighting _lighting;
         public readonly Player _player;
         private readonly Torch _torch;
-        private List<GlowStick> _glowSticks;
         private readonly List<Skeleton> _skeletons;
         private readonly UIManager _uiManager;
         public List<Obstacle> _obstacles;
@@ -22,18 +23,15 @@ namespace SteeringAssignment_real.Mangers
         private Texture2D pixelTexture;
         private Matrix _translation;
         private Vector2 Center = new(Globals.WindowSize.X / 2, Globals.WindowSize.Y / 2);
-        private Random random;
+        private readonly Random random;
         private const int VectorLength = 50;
         private bool DebugMode = false;
-        private int glowStickAmmo;
-        private bool glowstickCooldown = false;
-        private float glowstickCooldownDuration = 1.0f; // Adjust as needed, in seconds
-        private float glowstickCooldownTimer = 0.0f;
 
         public GameManager()
         {
             _map = new();
             _collisionManager = new CollisionManager(this);
+            _lighting = new Lighting();
             random = new();
 
             // Obstacles
@@ -42,24 +40,18 @@ namespace SteeringAssignment_real.Mangers
 
             _gridMap = new(this, _map);
 
-            _player = new Player(Globals.Content.Load<Texture2D>("walknew"), Center);
+            _player = new(Globals.Content.Load<Texture2D>("walknew"), Center, this);
             _player.SetBounds(_map.MapSize, _map.TileSize);
             _entities = new List<Sprite>{_player};
 
             _skeletons = new();
-            GenerateSkeletons(4);
+            _spawnManager = new(this);
 
-            _lighting = new Lighting();
-
-            _torch = new Torch((_player.Position + _player.origin + _player.origin / 2));
+            _torch = new Torch((_player.Position + _player.Origin + _player.Origin / 2));
             _lighting.AddLight(_torch);
 
-            _glowSticks = new();
-            GenerateGlowSticks(3);
-            glowStickAmmo = _glowSticks.Count-1;
-
             Globals.Font = Globals.Content.Load<SpriteFont>("Font");
-            _uiManager = new UIManager(_player);
+            _uiManager = new UIManager(_player, _collisionManager);
         }
 
         private void CalculateTranslation()
@@ -74,6 +66,7 @@ namespace SteeringAssignment_real.Mangers
         public void Update()
         {
             InputManager.Update();
+            _spawnManager.Update();
             DebugMode = InputManager.DebugMode;
 
             _player.Update(_collisionManager);
@@ -84,41 +77,7 @@ namespace SteeringAssignment_real.Mangers
             }
 
             _torch.LifeSpan -= Globals.Time;
-            _torch.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works
-
-            if (glowstickCooldown)
-            {
-                glowstickCooldownTimer -= Globals.Time;
-                if (glowstickCooldownTimer <= 0)
-                {
-                    glowstickCooldown = false;
-                }
-            }
-
-            if (glowStickAmmo >= 0 && !glowstickCooldown)
-            {
-                if (InputManager.G_keyPressed && _glowSticks[glowStickAmmo].throwable)
-                {
-                    _glowSticks[glowStickAmmo].Throw(InputManager.LastDirection);
-                    glowStickAmmo--;
-                    glowstickCooldown = true;
-                    glowstickCooldownTimer = glowstickCooldownDuration;
-                }
-
-                if (InputManager.E_keyPressed && _glowSticks[glowStickAmmo].throwable)
-                {
-                    _glowSticks[glowStickAmmo].Active = true;
-                }
-            }
-
-            foreach (var glowStick in _glowSticks)
-            {
-                if (glowStick.throwable)
-                {
-                    glowStick.Position = _player.Position + _player.origin + _player.origin / 2; // annoying but works 
-                }
-                glowStick.Update();
-            }
+            _torch.Position = _player.Position + _player.Origin + _player.Origin / 2; // annoying but works
 
             if (_torch.LifeSpan <= 0f)
             {
@@ -149,7 +108,6 @@ namespace SteeringAssignment_real.Mangers
 
             _map.Draw(_lighting);
             
-
             foreach (var rock in _obstacles)
             {
                 rock.Color = _lighting.CalculateLighting(rock.Position);
@@ -161,62 +119,26 @@ namespace SteeringAssignment_real.Mangers
             if (!_player.isDead() && DebugMode)
             {
                 _gridMap.Draw();
-                DrawLine(_player.Position, _player.Position + _player.playerDirection * VectorLength, Color.Red);
+                DrawLine(_player.Position, _player.Position + _player.PlayerDirection * VectorLength, Color.Red);
             } 
 
             foreach (var skeleton in _skeletons)
             {
                 skeleton.Color = _lighting.CalculateLighting(skeleton.Position);
                 skeleton.Draw();
-                if (skeleton.IsDead() && DebugMode)
+
+                if (!skeleton.IsDead() && DebugMode)
                 {
                     DrawLine(skeleton.Position, skeleton.Position + Vector2.Normalize(skeleton.skeletonDirection) * VectorLength, Color.Red);
                 }
             }
 
-            foreach (var glowStick in _glowSticks)
-            {
-                glowStick.Draw();
-            }
-
             Globals.SpriteBatch.End();
 
             _uiManager.Draw();
-            
         }
 
-        private void GenerateGlowSticks(int count)
-        {
-            Color red = new(200, 100, 100);
-            Color green = new(100, 200, 100);
-            Color blue = new(100, 100, 200);
-            GlowStick glowStick;
-            int randomPicker;
-
-            for (int i = 0; i < count; i++)
-            {
-                randomPicker = random.Next(0, 3);
-
-                if (randomPicker == 0)
-                {
-                    glowStick = new((_player.Position), red);
-                }
-                else if (randomPicker == 1)
-                {
-                    glowStick = new((_player.Position), green);
-                }
-                else
-                {
-                    glowStick = new((_player.Position), blue);
-                }
-                glowStick.SetBounds(_map.MapSize, _map.TileSize);
-                _glowSticks.Add(glowStick);
-                //_entities.Add(glowStick.GetEntity()); // causes problems like not allowing player to attack enemys
-                _lighting.AddLight(glowStick);
-            }
-        }
-
-        private void GenerateSkeletons(int count)
+        public void GenerateSkeletons(int count)
         {
             for (int i = 0; i < count; i++)
             {
@@ -283,17 +205,17 @@ namespace SteeringAssignment_real.Mangers
 
         public void DrawPositionDebug(Vector2 Position)
         {
-            float radius = 5f;
+            float radius = 3f;
 
             Color debugColor = Color.Blue;
 
             DrawCircle(Position, radius, debugColor);
         }
 
-        // Helper method to draw a circle
+ 
         private void DrawCircle(Vector2 position, float radius, Color color)
         {
-            int segments = 5; // Increase this for smoother circles
+            int segments = 4; 
             float angleIncrement = MathHelper.TwoPi / segments;
             Vector2[] circlePoints = new Vector2[segments];
 
@@ -306,14 +228,13 @@ namespace SteeringAssignment_real.Mangers
                 circlePoints[i] = new Vector2(x, y);
             }
 
-            // Draw the circle using primitive drawing methods provided by your framework
             for (int i = 0; i < segments - 1; i++)
             {
                 // Draw line segments between adjacent circle points
                 DrawLine(circlePoints[i], circlePoints[i + 1], color);
             }
 
-            // Connect the last circle point with the first one to close the loop
+            // Connect last circle point with first one to close the loop
             DrawLine(circlePoints[segments - 1], circlePoints[0], color);
         }
 
@@ -335,9 +256,19 @@ namespace SteeringAssignment_real.Mangers
 
         }
 
+        public List<Skeleton> GetSkeletons()
+        {
+            return _skeletons;
+        }
+
         public Point GetMapSize()
         {
             return _map.MapSize;
+        }
+
+        public Point GetTileSize()
+        {
+            return _map.TileSize;
         }
 
         public GridMap GetGridMap()

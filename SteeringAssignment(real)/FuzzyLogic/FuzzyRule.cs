@@ -1,24 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SteeringAssignment_real.FuzzyLogic
+﻿namespace SteeringAssignment_real.FuzzyLogic
 {
     public class FuzzyRule
     {
-        /**
-     * antecedent (usually a composite of several fuzzy sets and operators)
-     * @param a 
-     */
         private FuzzyTerm m_pAntecedent;
-        /** 
-         * consequence (usually a single fuzzy set, but can be several ANDed together)
-         */
         private FuzzyTerm m_pConsequence;
 
-        // it doesn't make sense to allow clients to copy rules
-        private FuzzyRule(FuzzyRule fr)
-        {
-        }
+        private FuzzyRule(FuzzyRule fr) {}
        
         public FuzzyRule(FuzzyTerm ant, FuzzyTerm con)
         {
@@ -31,10 +18,6 @@ namespace SteeringAssignment_real.FuzzyLogic
             m_pConsequence.ClearDOM();
         }
 
-        /**
-         * this method updates the DOM (the confidence) of the consequent term with
-         * the DOM of the antecedent term. 
-         */
         public void Calculate()
         {
             m_pConsequence.ORwithDOM(m_pAntecedent.GetDOM());

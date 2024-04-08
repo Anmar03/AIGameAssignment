@@ -8,7 +8,10 @@ namespace SteeringAssignment_real.Mangers
         private readonly GameManager gameManager;
         private readonly GridMap grid;
         private readonly float radius;
-        
+        private PriorityQueue<Vector2> openSet;
+        private HashSet<Vector2> closedSet;
+
+
         public PathManager(GameManager gameManager) 
         {
             this.gameManager = gameManager;
@@ -18,9 +21,9 @@ namespace SteeringAssignment_real.Mangers
 
         public List<Vector2> AStar(Vector2 source, Vector2 destination)
         {
-            PriorityQueue<Vector2> openSet = new();
-            HashSet<Vector2> closedSet = new(); // Closed set to track visited nodes
-            Dictionary<Vector2, Vector2> cameFrom = new(); // store parent nodes for path reconstruction
+            openSet = new();
+            closedSet = new(); 
+            Dictionary<Vector2, Vector2> cameFrom = new(); 
 
             source = grid.GetGridPointPosition(grid.GetNearestGridPoint(source));
             openSet.Enqueue(source, 1);
@@ -43,18 +46,17 @@ namespace SteeringAssignment_real.Mangers
                     Vector2 neighbourPosition = grid.GetGridPointPosition(neighbour);
                     if (gameManager.ObstacleProximity(neighbourPosition, radius) || closedSet.Contains(neighbourPosition))
                     {
-                        // Skip this neighbour if it's blocked or already visited
+                        // Skip neighbour if blocked or already visited
                         continue;
                     }
 
-                    // Calculate tentative g-score (distance from start to neighbour)
-                    float tentativeGScore = CalculateGScore(current, neighbourPosition);
+                    float gScore = GScoreCost(current, neighbourPosition);
 
                     // If neighbour is not in openSet or new path is better, update openSet and cameFrom
-                    if (!openSet.Contains(neighbourPosition) || tentativeGScore < CalculateGScore(neighbourPosition, cameFrom.GetValueOrDefault(neighbourPosition)))
+                    if (!openSet.Contains(neighbourPosition) || gScore < GScoreCost(neighbourPosition, cameFrom.GetValueOrDefault(neighbourPosition)))
                     {
                         cameFrom[neighbourPosition] = current;
-                        float fScore = tentativeGScore + HeuristicCostEstimate(neighbourPosition, destination); // f = g + h
+                        float fScore = gScore + HeuristicCost(neighbourPosition, destination); // f = g + h
                         openSet.Enqueue(neighbourPosition, fScore);
                     }
                 }
@@ -67,27 +69,33 @@ namespace SteeringAssignment_real.Mangers
         // Method to reconstruct shortest path
         private List<Vector2> ReconstructPath(Dictionary<Vector2, Vector2> cameFrom, Vector2 current)
         {
-            List<Vector2> path = new List<Vector2>();
-            path.Add(current);
+            List<Vector2> path = new List<Vector2>{ current };
+
             while (cameFrom.ContainsKey(current))
             {
                 current = cameFrom[current];
                 path.Add(current);
             }
+
             path.Reverse(); 
             return path;
         }
 
-        // Method to calculate heuristic cost from a node to destination
-        private float HeuristicCostEstimate(Vector2 from, Vector2 to)
+        // heuristic cost from a node to destination
+        private float HeuristicCost(Vector2 from, Vector2 to)
         {
             return Vector2.DistanceSquared(from, to);
         }
 
-        // Method to calculate actual cost from start to a node
-        private float CalculateGScore(Vector2 current, Vector2 neighbour)
+        // calculate actual cost from start to a node
+        private float GScoreCost(Vector2 current, Vector2 neighbour)
         {
             return Vector2.DistanceSquared(current, neighbour);
+        }
+
+        public HashSet<Vector2> GetConsideredNodes()
+        {
+            return closedSet;
         }
     }
 }

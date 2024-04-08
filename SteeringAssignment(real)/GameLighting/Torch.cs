@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SteeringAssignment_real
+namespace SteeringAssignment_real.GameLighting
 {
     public class Torch : Light
     {

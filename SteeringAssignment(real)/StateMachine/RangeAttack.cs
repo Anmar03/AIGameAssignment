@@ -6,7 +6,7 @@ using SharpDX.Direct3D9;
 using SteeringAssignment_real.Mangers;
 using System.Numerics;
 
-namespace SteeringAssignment_real.StateMachineF
+namespace SteeringAssignment_real.StateMachine
 {
     public class RangeAttack : State
     {

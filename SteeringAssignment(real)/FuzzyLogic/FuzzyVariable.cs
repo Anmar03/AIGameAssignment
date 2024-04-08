@@ -10,19 +10,17 @@ namespace SteeringAssignment_real.FuzzyLogic
     {
         private class MemberSets : Dictionary<string, setTypes.FuzzySet> {};
 
-        //disallow copies
         private FuzzyVariable(FuzzyVariable fv)
         {
             throw new NotSupportedException("Unsupported operation");
         }
 
         private MemberSets m_MemberSets = new MemberSets();
-        //the minimum and maximum value of the range of this variable
         private double m_dMinRange;
         private double m_dMaxRange;
 
-        //this method is called with the upper and lower bound of a set each time a
-        //new set is added to adjust the upper and lower range values accordingly
+        // method is called with the upper and lower bound of a set each time a
+        // new set is added to adjust the upper and lower range values accordingly
         private void AdjustRangeToFit(double minBound, double maxBound)
         {
             if (minBound < m_dMinRange)
@@ -40,20 +38,12 @@ namespace SteeringAssignment_real.FuzzyLogic
             m_dMinRange = 0.0;
             m_dMaxRange = 0.0;
         }
-
-        //the following methods create instances of the sets named in the method
-        //name and add them to the member set map. Each time a set of any type is
-        //added the m_dMinRange and m_dMaxRange are adjusted accordingly. All of the
-        //methods return a proxy class representing the newly created instance. This
-        //proxy set can be used as an operand when creating the rule base.
-        /**
-         * adds a left shoulder type set
-         */
+        
+        // adds a left shoulder type set
         public FzSet AddLeftShoulderSet(string name, double minBound, double peak, double maxBound)
         {
             m_MemberSets[name] = new FuzzySet_LeftShoulder(peak, peak - minBound, maxBound - peak);
 
-            //adjust range if necessary
             AdjustRangeToFit(minBound, maxBound);
 
             return new FzSet(m_MemberSets[name]);
@@ -63,7 +53,6 @@ namespace SteeringAssignment_real.FuzzyLogic
         {
             m_MemberSets[name] = new FuzzySet_RightShoulder(peak, peak - minBound, maxBound - peak);
 
-            //adjust range if necessary
             AdjustRangeToFit(minBound, maxBound);
 
             return new FzSet(m_MemberSets[name]);
@@ -73,7 +62,6 @@ namespace SteeringAssignment_real.FuzzyLogic
         {
             m_MemberSets[name] = new FuzzySet_Triangle(peak, peak - minBound, maxBound - peak);
 
-            //adjust range if necessary
             AdjustRangeToFit(minBound, maxBound);
 
             return new FzSet(m_MemberSets[name]);
@@ -131,7 +119,7 @@ namespace SteeringAssignment_real.FuzzyLogic
         // defuzzify the variable using the centroid method
         public double DeFuzzifyCentroid(int NumSamples)
         {
-            //calculate the step size
+            // calculate the step size
             double StepSize = (m_dMaxRange - m_dMinRange) / (double)NumSamples;
 
             double TotalArea = 0.0;
@@ -143,7 +131,7 @@ namespace SteeringAssignment_real.FuzzyLogic
             //the total area of the fuzzy manifold.(This is similar to how the area under
             //a curve is calculated using calculus... the heights of lots of 'slices' are
             //summed to give the total area.)
-            //
+            
             //in addition the moment of each slice is calculated and summed. Dividing
             //the total area by the sum of the moments gives the centroid. (Just like
             //calculating the center of mass of an object)

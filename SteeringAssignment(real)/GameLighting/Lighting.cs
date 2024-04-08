@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace SteeringAssignment_real
+namespace SteeringAssignment_real.GameLighting
 {
     public class Lighting
     {

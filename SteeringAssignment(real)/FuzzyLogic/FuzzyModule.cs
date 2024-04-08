@@ -13,15 +13,11 @@ namespace SteeringAssignment_real.FuzzyLogic
             }
         }
 
-        //a client must pass one of these values to the defuzzify method.
-        //This module only supports the MaxAv and centroid methods.
+        
         public enum DefuzzifyType { max_av, centroid };
 
-        //when calculating the centroid of the fuzzy manifold this value is used
-        //to determine how many cross sections should be sampled
         public static int NumSamplesToUseForCentroid = 15;
 
-        // Map of all the fuzzy variables this module uses
         private varMap m_Variables = new();
 
         // Vector containing all the fuzzy rules
@@ -60,10 +56,6 @@ namespace SteeringAssignment_real.FuzzyLogic
             }
         }
 
-        /**
-         * given a fuzzy variable and a deffuzification method this returns a 
-         * crisp value
-         */
         public double DeFuzzify(string NameOfFLV, DefuzzifyType method)
         {
             // make sure key exists
@@ -72,10 +64,10 @@ namespace SteeringAssignment_real.FuzzyLogic
                 throw new KeyNotFoundException("<FuzzyModule::DeFuzzifyMaxAv>: key not found");
             }
 
-            //clear the DOMs of all the consequents of all the rules
+            // clear the DOMs of all the consequents of all the rules
             SetConfidencesOfConsequentsToZero();
 
-            //process the rules
+            // process the rules
             foreach (var curRule in m_Rules)
             {
                 curRule.Calculate();

@@ -3,7 +3,7 @@ using SteeringAssignment_real.Mangers;
 using SteeringAssignment_real.Models;
 using System;
 
-namespace SteeringAssignment_real.StateMachineF
+namespace SteeringAssignment_real.StateMachine
 {
     public class Wander : State
     {
@@ -46,11 +46,13 @@ namespace SteeringAssignment_real.StateMachineF
                 }
 
                 // Gradually turn towards wander target direction
-                if (skeleton.skeletonDirection != skeleton.wanderDirection && skeleton.rSpeed != 0)
+                if (skeleton.skeletonDirection != skeleton.wanderDirection && skeleton.rSpeed != 0 || skeleton.ObstacleProx())
                 {
                     skeleton.skeletonDirection += skeleton.turnSpeed;
                     skeleton.skeletonDirection.Normalize();
                 }
+
+
 
                 // Update position based on wander direction and speed
                 skeleton.Position += skeleton.skeletonDirection * skeleton.rSpeed * Globals.Time;
@@ -58,7 +60,7 @@ namespace SteeringAssignment_real.StateMachineF
                 // If wander duration elapsed, reset wander
                 if (wanderDuration <= 0)
                 {
-                    wanderDuration = (float)skeleton.random.NextDouble() * 3.0f;
+                    wanderDuration = (float)skeleton.random.NextDouble() * 4.0f;
                     skeleton.wanderDirection = Vector2.Zero;
                     skeleton.turnSpeed = new Vector2(skeleton.random.Next(-10, 10), skeleton.random.Next(-10, 10));
 

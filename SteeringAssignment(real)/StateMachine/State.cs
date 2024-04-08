@@ -1,7 +1,7 @@
 ﻿using SteeringAssignment_real.FuzzyLogic;
 using SteeringAssignment_real.Models;
 
-namespace SteeringAssignment_real.StateMachineF
+namespace SteeringAssignment_real.StateMachine
 {
     public abstract class State
     {

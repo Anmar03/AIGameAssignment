@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using SteeringAssignment_real.Mangers;
-using SteeringAssignment_real.StateMachineF;
+using SteeringAssignment_real.StateMachine;
 using System.Collections.Generic;
 
 namespace SteeringAssignment_real.Models
@@ -17,10 +17,9 @@ namespace SteeringAssignment_real.Models
         private readonly AnimationManager _attackAnimation = new();
         private readonly AnimationManager _deadAnimation = new();
         private readonly GameManager _gameManager;
-        public Vector2 origin;
         private readonly Texture2D attackTexture;
         private readonly Texture2D deadTexture;
-        public Random random = new();
+        public readonly Random random = new();
         private const float pushForce = 600;
         private const float fireballPushForce = 1500;
         private float attackDelayTimer = 0;
@@ -37,7 +36,6 @@ namespace SteeringAssignment_real.Models
         public bool closeAttack;
         private Object deathAnimationKey;
         private Player _player;
-        private State CurrentState;
         private Vector2 pushDirection;
         private int Ammo = 4;
         private Texture2D fireBallTexture;
@@ -46,15 +44,15 @@ namespace SteeringAssignment_real.Models
         public bool fireballAttack = false;
         private Vector2 fireBallDirection;
 
-
         public Skeleton(Texture2D texture, Vector2 position, GameManager gameManager) : base(texture, position)
         {
             _gameManager = gameManager;
             pathManager = new(gameManager);
             shortestPath = new();
             skeletonDirection = gameManager._player.Position - Position; skeletonDirection.Normalize();
-            turnSpeed = new(random.Next(-100, 100), random.Next(-100, 100));
+            turnSpeed = new(random.Next(-60, 60), random.Next(-60, 60));
             CurrentState = Wander.Instance();
+            velocity = Vector2.Zero;
 
             frame = new Animation(texture, 8, 8, 0.1f, 7);
             _anims.AddAnimation(new Vector2(0, 1), frame);
@@ -99,7 +97,7 @@ namespace SteeringAssignment_real.Models
         {
             width = frame.frameWidth; 
             height = frame.frameHeight;
-            origin = new Vector2(width / 2, height / 2);
+            Origin = new Vector2(width / 2, height / 2);
             radiusSquared = (width/2) * (width/2); 
 
             _minPos = new((-tileSize.X / 2) + width / 4, (-tileSize.Y / 2) + height / 3);
@@ -136,26 +134,18 @@ namespace SteeringAssignment_real.Models
                         node = 0;
                     }
 
-                    if (shortestPath.Count == 0) // if shortest path fails
+                    if (Vector2.DistanceSquared(Position, shortestPath[node]) < radiusSquared)
                     {
-                        skeletonDirection = _player.Position - Position; skeletonDirection.Normalize();
-                    }
-                    else
-                    {
-                        skeletonDirection = shortestPath[node] - Position; skeletonDirection.Normalize();
-
-                        if (Vector2.DistanceSquared(Position, shortestPath[node]) < radiusSquared)
+                        if (node < shortestPath.Count-1)
                         {
-                            if (node < shortestPath.Count-1)
-                            {
-                                node++;
-                            }
-                            else
-                            {
-                                skeletonDirection = _player.Position - Position; skeletonDirection.Normalize();
-                            }
+                            node++;
+                        }
+                        else
+                        {
+                            skeletonDirection = _player.Position - Position; skeletonDirection.Normalize();
                         }
                     }
+                    
                 }
             }
             
@@ -200,22 +190,22 @@ namespace SteeringAssignment_real.Models
             switch (CurrentState)
             {
                 case Wander:
-                    _anims.Draw(Position - origin, Color);
+                    _anims.Draw(Position - Origin, Color);
                     break;
 
                 case CloseAttack:
-                    _attackAnimation.Draw(Position - origin, Color);
+                    _attackAnimation.Draw(Position - Origin, Color);
                     break;
 
                 case RangeAttack:
-                    _anims.Draw(Position - origin, Color);
+                    _anims.Draw(Position - Origin, Color);
                     break;
 
                 case Aggro:
-                    _anims.Draw(Position - origin, Color);
+                    _anims.Draw(Position - Origin, Color);
                     if (InputManager.DebugMode)
                     {
-                        foreach (var node in shortestPath)
+                        foreach (var node in pathManager.GetConsideredNodes())
                         {
                             _gameManager.DrawPositionDebug(node);
                         }
@@ -223,11 +213,12 @@ namespace SteeringAssignment_real.Models
                     break;
 
                 case Dead:
-                    _deadAnimation.Draw(Position - origin, Color);
+                    _deadAnimation.Draw(Position - Origin, Color);
                     break;
             }
         } // end draw
 
+        // Method Chooses Attack based on Fuzzy Logic
         public void SelectAttack()
         {
             float distance = Vector2.Distance(Position, _player.Position);
@@ -283,19 +274,18 @@ namespace SteeringAssignment_real.Models
             CurrentState.Enter(this);
         }
 
+        public bool ObstacleProx()
+        {
+            return _gameManager.ObstacleProximity(Position, width/2);
+        }
         public bool IsDead()
         {
             return CurrentState == Dead.Instance();
         }
-        public float GetAttackDamage() => attackDamage;
         public float GetAttackTimer() => attackDelayTimer;
         public void SetAttackTimer()
         {
             attackDelayTimer = attackDelayDuration;
-        }
-        public float GetAmmo()
-        {
-            return Ammo;
         }
         public float GetPushForce() => pushForce;
         public void SetPushDirection(Vector2 newDirection)
